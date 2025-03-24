@@ -58,7 +58,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PetForm(pet: pet)),
+          MaterialPageRoute(builder: (context) => PetDetails(pet: pet)),
         ).then((_) {
           setState(() {});
         });

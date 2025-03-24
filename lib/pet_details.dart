@@ -10,43 +10,67 @@ class PetDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(pet.name),
+        title: Text('Nome do Pet'),
         backgroundColor: Colors.blue[300],
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: Container(
-              width: double.infinity,
-              color: Colors.grey[300],
-            ),
-          ),
-          Expanded(
-            flex: 3, // Aumenta o flex para ocupar mais espaço
-            child: Card(
-              elevation: 4.0,
-              margin: EdgeInsets.all(16.0), // Adiciona margem ao card
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text('Nome: ${pet.name}', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8.0),
-                    Text('Espécie: ${pet.species}'),
-                    SizedBox(height: 8.0),
-                    Text('Raça: ${pet.breed}'),
-                    SizedBox(height: 8.0),
-                    Text('Idade: ${pet.age} anos'),
-                    SizedBox(height: 8.0),
-                    // Adicione mais informações detalhadas aqui
-                  ],
-                ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: AssetImage('assets/ed.jpg'),
               ),
-            ),
+              SizedBox(height: 16),
+              Text('Zeca', style: TextStyle(fontSize: 24, color: Colors.black)),
+              SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _buildCardButton(context, 'Perfil', Icons.pets, () {}),
+                  _buildCardButton(context, 'Carteira de \nVacinação', Icons.calendar_today, () {}),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _buildCardButton(context, 'Medicamentos', Icons.medical_information_rounded, () {}),
+                  _buildCardButton(context, 'Evolução do Pet', Icons.description, () {}),
+                ],
+              ),
+
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardButton(BuildContext context, String title, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 120,
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(icon, size: 30, color: Colors.blue[900]),
+            SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.blue[900]),
+            ),
+          ],
+        ),
       ),
     );
   }
