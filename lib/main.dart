@@ -8,9 +8,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MyHomePage(),
-    );
+    return MaterialApp(home: MyHomePage());
   }
 }
 
@@ -20,25 +18,17 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[300],
-        title: Text(
-          'CuidaPet',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('CuidaPet', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue[300],
-              ),
+              decoration: BoxDecoration(color: Colors.blue[300]),
               child: Text(
                 'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
             ListTile(
@@ -46,7 +36,6 @@ class MyHomePage extends StatelessWidget {
               title: Text('Início'),
               onTap: () {
                 Navigator.pop(context);
-                // Lógica da página inicial
               },
             ),
             ListTile(
@@ -64,17 +53,65 @@ class MyHomePage extends StatelessWidget {
               title: Text('Configurações'),
               onTap: () {
                 Navigator.pop(context);
-                // Lógica da página de configurações
               },
             ),
           ],
         ),
       ),
       body: Center(
-        child: Icon(
-          Icons.pets,
-          size: 100.0,
-          color: Colors.blue[300],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 50.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.pets, size: 100.0, color: Colors.blue[300]),
+              SizedBox(height: 16.0),
+              Text('Olá, usuário(a)!', style: TextStyle(fontSize: 18.0)),
+              Text('Seja bem-vindo. O que deseja fazer?', style: TextStyle(fontSize: 18.0)),
+              SizedBox(height: 20.0),
+              Padding( // Adicionado um Padding para margem horizontal
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: _buildCardButton(context, 'Meus Pets', Icons.pets, MeusPetsPage()),
+                    ),
+                    SizedBox(width: 16.0),
+                    Expanded(
+                      child: _buildCardButton(context, 'Configurações', Icons.settings, MeusPetsPage()), // Substitua MeusPetsPage pela página de configurações
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardButton(BuildContext context, String title, IconData icon, Widget page) {
+    return InkWell(
+      onTap: () {
+        if (page != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+        } else {
+          print('Configurações pressionado');
+        }
+      },
+      child: Card(
+        elevation: 4.0,
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(icon, size: 40.0, color: Colors.blue[300]),
+              SizedBox(height: 8.0),
+              Text(title, style: TextStyle(fontSize: 16.0), textAlign: TextAlign.center,),
+            ],
+          ),
         ),
       ),
     );
