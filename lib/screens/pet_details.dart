@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'pet.dart';
+import '../database/models/pet.dart';
+import 'vacinas_pet_page.dart';
 
 class PetDetails extends StatelessWidget {
   final Pet pet;
 
-  PetDetails({required this.pet});
+  const PetDetails({required this.pet, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Nome do Pet'),
+        title: Text(pet.name),
         backgroundColor: Colors.blue[300],
       ),
       body: Center(
@@ -19,21 +20,26 @@ class PetDetails extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              CircleAvatar(
+              const CircleAvatar(
                 radius: 50,
                 backgroundImage: AssetImage('assets/ed.jpg'),
               ),
-              SizedBox(height: 16),
-              Text('Zeca', style: TextStyle(fontSize: 24, color: Colors.black)),
-              SizedBox(height: 32),
+              const SizedBox(height: 16),
+              Text(pet.name, style: const TextStyle(fontSize: 24, color: Colors.black)),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   _buildCardButton(context, 'Perfil', Icons.pets, () {}),
-                  _buildCardButton(context, 'Carteira de \nVacinação', Icons.calendar_today, () {}),
+                  _buildCardButton(context, 'Vacinas', Icons.calendar_today, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => VacinasPetPage(pet: pet)),
+                    );
+                  }),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -41,7 +47,6 @@ class PetDetails extends StatelessWidget {
                   _buildCardButton(context, 'Evolução do Pet', Icons.description, () {}),
                 ],
               ),
-
             ],
           ),
         ),
@@ -63,11 +68,11 @@ class PetDetails extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Icon(icon, size: 30, color: Colors.blue[900]),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.blue[900]),
+              style: const TextStyle(color: Colors.blue),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
-import 'pet.dart';
+import '../database/helpers/database_helper.dart';
+import '../database/models/pet.dart';
+import '../database/repositories/pet_repository.dart';
 import 'pet_form.dart';
 import 'pet_details.dart';
 
@@ -10,22 +11,28 @@ class MeusPetsPage extends StatefulWidget {
 }
 
 class _MeusPetsPageState extends State<MeusPetsPage> {
-  final _databaseHelper = DatabaseHelper();
+  late PetRepository _petRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    _petRepository = PetRepository(DatabaseHelper());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Meus Pets'),
+        title: const Text('Meus Pets'),
         backgroundColor: Colors.blue[300],
       ),
       body: FutureBuilder<List<Pet>>(
-        future: _databaseHelper.getPets(),
+        future: _petRepository.getPets(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Erro ao carregar os pets'));
+            return const Center(child: Text('Erro ao carregar os pets'));
           } else if (snapshot.hasData) {
             final pets = snapshot.data!;
             return ListView.builder(
@@ -35,7 +42,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
               },
             );
           } else {
-            return Center(child: Text('Nenhum pet cadastrado'));
+            return const Center(child: Text('Nenhum pet cadastrado'));
           }
         },
       ),
@@ -48,7 +55,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
             setState(() {});
           });
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -67,7 +74,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
         _showDeleteConfirmationDialog(context, pet);
       },
       child: Card(
-        margin: EdgeInsets.all(8.0),
+        margin: const EdgeInsets.all(8.0),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -77,13 +84,13 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
                 height: 80.0,
                 color: Colors.grey[300],
               ),
-              SizedBox(width: 16.0),
+              const SizedBox(width: 16.0),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
                     pet.name,
-                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                   ),
                   Text(pet.species),
                   Text(pet.breed),
@@ -102,23 +109,23 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Excluir Pet'),
+          title: const Text('Excluir Pet'),
           content: Text('Deseja realmente excluir ${pet.name}?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancelar'),
+              child: const Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Excluir'),
+              child: const Text('Excluir'),
               onPressed: () async {
-                await _databaseHelper.deletePet(pet.id!);
+                await _petRepository.deletePet(pet.id!);
                 Navigator.of(context).pop();
                 setState(() {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Pet excluído com sucesso!')),
+                    const SnackBar(content: Text('Pet excluído com sucesso!')),
                   );
                 });
               },
