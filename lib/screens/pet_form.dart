@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
-import 'pet.dart';
+import '../database/models/pet.dart';
+import '../database/repositories/pet_repository.dart';
+import '../database/helpers/database_helper.dart';
 
 class PetForm extends StatefulWidget {
   final Pet? pet; // Pet opcional para edição
 
-  PetForm({this.pet});
+  const PetForm({this.pet, super.key});
 
   @override
   _PetFormState createState() => _PetFormState();
@@ -18,12 +19,13 @@ class _PetFormState extends State<PetForm> {
   final _breedController = TextEditingController();
   final _ageController = TextEditingController();
 
-  final _databaseHelper = DatabaseHelper();
+  late PetRepository _petRepository;
 
   @override
   void initState() {
     super.initState();
-    if (widget.pet != null) { // Se um pet for fornecido, preenche os campos
+    _petRepository = PetRepository(DatabaseHelper());
+    if (widget.pet != null) {
       _nameController.text = widget.pet!.name;
       _speciesController.text = widget.pet!.species;
       _breedController.text = widget.pet!.breed;
@@ -32,10 +34,19 @@ class _PetFormState extends State<PetForm> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _speciesController.dispose();
+    _breedController.dispose();
+    _ageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.pet == null ? 'Cadastrar Pet' : 'Editar Pet'), // Título dinâmico
+        title: Text(widget.pet == null ? 'Cadastrar Pet' : 'Editar Pet'),
         backgroundColor: Colors.blue[300],
       ),
       body: Padding(
@@ -50,53 +61,53 @@ class _PetFormState extends State<PetForm> {
                 labelText: 'Nome',
                 icon: Icons.pets,
               ),
-              SizedBox(height: 12.0),
+              const SizedBox(height: 12.0),
               _buildTextFormField(
                 controller: _speciesController,
                 labelText: 'Espécie',
                 icon: Icons.category,
               ),
-              SizedBox(height: 12.0),
+              const SizedBox(height: 12.0),
               _buildTextFormField(
                 controller: _breedController,
                 labelText: 'Raça',
                 icon: Icons.pets,
               ),
-              SizedBox(height: 12.0),
+              const SizedBox(height: 12.0),
               _buildTextFormField(
                 controller: _ageController,
                 labelText: 'Idade',
                 icon: Icons.calendar_today,
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 24.0),
+              const SizedBox(height: 24.0),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final pet = Pet(
-                      id: widget.pet?.id, // Mantém o ID se for edição
+                      id: widget.pet?.id,
                       name: _nameController.text,
                       species: _speciesController.text,
                       breed: _breedController.text,
                       age: int.parse(_ageController.text),
                     );
                     if (widget.pet == null) {
-                      await _databaseHelper.insertPet(pet);
+                      await _petRepository.insertPet(pet);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Pet cadastrado com sucesso!')),
+                        const SnackBar(content: Text('Pet cadastrado com sucesso!')),
                       );
                     } else {
-                      await _databaseHelper.updatePet(pet);
+                      await _petRepository.updatePet(pet);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Pet atualizado com sucesso!')),
+                        const SnackBar(content: Text('Pet atualizado com sucesso!')),
                       );
                     }
                     Navigator.pop(context);
                   }
                 },
-                child: Text(widget.pet == null ? 'Cadastrar' : 'Atualizar'), // Texto dinâmico
+                child: Text(widget.pet == null ? 'Cadastrar' : 'Atualizar'),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -127,7 +138,7 @@ class _PetFormState extends State<PetForm> {
       keyboardType: keyboardType,
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Por favor, insira $labelText.toLowerCase() do pet';
+          return 'Por favor, insira $labelText do pet';
         }
         return null;
       },

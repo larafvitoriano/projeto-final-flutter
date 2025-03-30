@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
-import 'pet.dart';
-import 'pet_contract.dart';
 import 'package:path/path.dart';
+import '../contracts/pet_contract.dart';
+import '../contracts/vaccine_contract.dart';
 
 class DatabaseHelper {
   static Database? _database;
@@ -26,41 +26,15 @@ class DatabaseHelper {
               " ${PetContract.breedColumn} TEXT, "
               " ${PetContract.ageColumn} INTEGER)",
         );
+        await db.execute(
+          "CREATE TABLE ${VaccineContract.vaccineTable}(${VaccineContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
+              " ${VaccineContract.petIdColumn} INTEGER, "
+              " ${VaccineContract.nameColumn} TEXT, "
+              " ${VaccineContract.dateColumn} TEXT, "
+              " ${VaccineContract.nextDoseDateColumn} TEXT, "
+              " FOREIGN KEY (${VaccineContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
+        );
       },
-    );
-  }
-
-  Future<int> insertPet(Pet pet) async {
-    final db = await database;
-    return db.insert(PetContract.petTable, pet.toMap());
-  }
-
-  Future<List<Pet>> getPets() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      PetContract.petTable,
-    );
-    return List.generate(maps.length, (i) {
-      return Pet.fromMap(maps[i]);
-    });
-  }
-
-  Future<int> updatePet(Pet pet) async {
-    final db = await database;
-    return db.update(
-      PetContract.petTable,
-      pet.toMap(),
-      where: '${PetContract.idColumn} = ?',
-      whereArgs: [pet.id],
-    );
-  }
-
-  Future<int> deletePet(int id) async {
-    final db = await database;
-    return db.delete(
-      PetContract.petTable,
-      where: '${PetContract.idColumn} = ?',
-      whereArgs: [id],
     );
   }
 }
