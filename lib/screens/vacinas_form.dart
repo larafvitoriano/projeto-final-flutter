@@ -7,8 +7,9 @@ import '../database/helpers/database_helper.dart';
 
 class VacinasForm extends StatefulWidget {
   final Pet pet;
+  final Vaccine? vaccine;
 
-  const VacinasForm({required this.pet, super.key});
+  const VacinasForm({required this.pet, this.vaccine, super.key});
 
   @override
   _VacinasFormState createState() => _VacinasFormState();
@@ -26,6 +27,11 @@ class _VacinasFormState extends State<VacinasForm> {
   void initState() {
     super.initState();
     _vaccineRepository = VaccineRepository(DatabaseHelper());
+    if (widget.vaccine != null) {
+      _nameController.text = widget.vaccine!.name;
+      _dateController.text = widget.vaccine!.date;
+      _nextDoseDateController.text = widget.vaccine!.nextDoseDate;
+    }
   }
 
   @override
@@ -53,7 +59,7 @@ class _VacinasFormState extends State<VacinasForm> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
-      locale: const Locale('pt', 'BR'), // Configura o locale para português do Brasil
+      locale: const Locale('pt', 'BR'),
       initialEntryMode: DatePickerEntryMode.calendarOnly,
     );
     if (picked != null) {
@@ -66,7 +72,7 @@ class _VacinasFormState extends State<VacinasForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cadastrar Vacina'),
+        title: Text(widget.vaccine == null ? 'Cadastrar Vacina' : 'Editar Vacina'),
         backgroundColor: Colors.blue[300],
       ),
       body: Padding(
@@ -98,24 +104,30 @@ class _VacinasFormState extends State<VacinasForm> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final vaccine = Vaccine(
+                      id: widget.vaccine?.id,
                       petId: widget.pet.id!,
                       name: _nameController.text,
                       date: _dateController.text,
                       nextDoseDate: _nextDoseDateController.text,
                     );
-                    await _vaccineRepository.insertVaccine(vaccine);
-                    print(
-                      'Vacina inserida com sucesso para petId: ${widget.pet.id}',
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vacina cadastrada com sucesso'),
-                      ),
-                    );
-                    Navigator.pop(context);
+                    try{
+                      if (widget.vaccine == null) {
+                        await _vaccineRepository.insertVaccine(vaccine);
+                      } else {
+                        await _vaccineRepository.updateVaccine(vaccine);
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Vacina ${widget.vaccine == null ? 'cadastrada' : 'atualizada'} com sucesso')),
+                      );
+                      Navigator.pop(context);
+                    } catch (e){
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Erro ao cadastrar/atualizar vacina')),
+                      );
+                    }
                   }
                 },
-                child: const Text('Cadastrar Vacina'),
+                child: Text(widget.vaccine == null ? 'Cadastrar Vacina' : 'Atualizar Vacina'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
@@ -145,14 +157,12 @@ class _VacinasFormState extends State<VacinasForm> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       keyboardType: keyboardType,
-      validator:
-      validator ??
-              (value) {
-            if (value == null || value.isEmpty) {
-              return 'Por favor, insira $labelText';
-            }
-            return null;
-          },
+      validator: validator ?? (value) {
+        if (value == null || value.isEmpty) {
+          return 'Por favor, insira $labelText';
+        }
+        return null;
+      },
     );
   }
 
