@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../contracts/pet_contract.dart';
 import '../contracts/vaccine_contract.dart';
+import '../contracts/medicine_contract.dart';
 
 class DatabaseHelper {
   static Database? _database;
@@ -33,6 +34,19 @@ class DatabaseHelper {
               " ${VaccineContract.dateColumn} TEXT, "
               " ${VaccineContract.nextDoseDateColumn} TEXT, "
               " FOREIGN KEY (${VaccineContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
+        );
+        await db.execute(
+          "CREATE TABLE ${MedicineContract.medicineTable}(${MedicineContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
+              " ${MedicineContract.petIdColumn} INTEGER, "
+              " ${MedicineContract.nameColumn} TEXT, "
+              " ${MedicineContract.dosageColumn} REAL, "
+              " ${MedicineContract.unitColumn} TEXT, "
+              " ${MedicineContract.administrationColumn} TEXT, "
+              " ${MedicineContract.frequencyColumn} TEXT, "
+              " ${MedicineContract.startDateColumn} TEXT, "
+              " ${MedicineContract.endDateColumn} TEXT, "
+              " ${MedicineContract.notesColumn} TEXT, "
+              " FOREIGN KEY (${MedicineContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
         );
       },
     );
