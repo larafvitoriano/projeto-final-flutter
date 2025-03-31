@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'screens/meus_pets_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -21,7 +30,17 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [
         Locale('pt', 'BR'), // Português do Brasil
       ],
-      home: const MyHomePage(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return snapshot.hasData ? const MyHomePage() : const LoginPage();
+        },
+      ),
     );
   }
 }
@@ -38,6 +57,18 @@ class MyHomePage extends StatelessWidget {
           'CuidaPet',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+          )
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -72,6 +103,17 @@ class MyHomePage extends StatelessWidget {
               title: const Text('Configurações'),
               onTap: () {
                 Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout, color: Colors.green[500]),
+              title: const Text('Sair'),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
               },
             ),
           ],
