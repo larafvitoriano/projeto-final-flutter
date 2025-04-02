@@ -160,7 +160,7 @@ class _VacinasPetPageState extends State<VacinasPetPage> {
             TextButton(
               child: const Text('Excluir'),
               onPressed: () async {
-                await _vaccineRepository.deleteVaccine(vaccine.id!);
+                await _vaccineRepository.deleteVaccine(vaccine.id!, widget.pet.id!);
                 setState(() {}); // Atualiza a lista após a exclusão
                 Navigator.of(context).pop();
               },

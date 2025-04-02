@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'main.dart';
 import 'register_page.dart';
+import 'services/sync_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,25 +28,21 @@ class _LoginPageState extends State<LoginPage> {
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
+        // Após o login, baixe os dados do usuário para o SQLite
+        await SyncService().downloadUserData();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MyHomePage()),
         );
       } on FirebaseAuthException catch (e) {
         String message = 'Erro ao efetuar login.';
-        // Verifica o código de erro retornado
         if (e.code == 'wrong-password') {
           message = 'Senha incorreta. Tente novamente ou toque em "Esqueci a senha".';
-        } else if (e.code == 'user-not-found') {
-          message = 'Usuário não encontrado. Verifique o e-mail e tente novamente.';
-        } else if (e.code == 'invalid-email') {
-          message = 'Formato de e-mail inválido.';
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
-      }
-      finally {
+      } finally {
         setState(() {
           _isLoading = false;
         });

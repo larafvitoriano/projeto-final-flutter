@@ -13,6 +13,13 @@ class DatabaseHelper {
     return _database!;
   }
 
+  Future<void> clearDatabase() async {
+    final db = await database;
+    await db.delete(PetContract.petTable);
+    await db.delete(VaccineContract.vaccineTable);
+    await db.delete(MedicineContract.medicineTable);
+  }
+
   Future<Database> _initDatabase() async {
     String databasesPath = await getDatabasesPath();
     String path = join(databasesPath, "pets.db");
