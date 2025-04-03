@@ -145,7 +145,7 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
             TextButton(
               child: const Text('Excluir'),
               onPressed: () async {
-                await _medicineRepository.deleteMedicine(medicine.id!);
+                await _medicineRepository.deleteMedicine(medicine.id!, medicine.petId);
                 setState(() {}); // Atualiza a lista após a exclusão
                 Navigator.of(context).pop();
               },

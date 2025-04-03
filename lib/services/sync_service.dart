@@ -20,13 +20,19 @@ class SyncService {
   Future<void> syncNewPet(Pet pet, int localId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    await firestore.collection('users').doc(user.uid).collection('pets').add({
+
+    await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('pets')
+        .doc(localId.toString()) // Usa o ID fixo (localId)
+        .set({
       'localId': localId,
       'name': pet.name,
       'species': pet.species,
       'breed': pet.breed,
       'age': pet.age,
-    });
+    }, SetOptions(merge: true));
   }
 
   Future<void> syncUpdatePet(Pet pet) async {
@@ -52,14 +58,57 @@ class SyncService {
   Future<void> syncDeletePet(int localId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    QuerySnapshot snapshot = await firestore
+    QuerySnapshot petSnapshot = await firestore
         .collection('users')
         .doc(user.uid)
         .collection('pets')
         .where('localId', isEqualTo: localId)
         .get();
-    for (var doc in snapshot.docs) {
-      await firestore.collection('users').doc(user.uid).collection('pets').doc(doc.id).delete();
+    for (var petDoc in petSnapshot.docs) {
+      // Excluir vacinas (já existente) ...
+      QuerySnapshot vaccineSnapshot = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petDoc.id)
+          .collection('vaccines')
+          .get();
+      for (var vDoc in vaccineSnapshot.docs) {
+        await firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('pets')
+            .doc(petDoc.id)
+            .collection('vaccines')
+            .doc(vDoc.id)
+            .delete();
+      }
+
+      // Excluir medicamentos
+      QuerySnapshot medicineSnapshot = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petDoc.id)
+          .collection('medicines')
+          .get();
+      for (var mDoc in medicineSnapshot.docs) {
+        await firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('pets')
+            .doc(petDoc.id)
+            .collection('medicines')
+            .doc(mDoc.id)
+            .delete();
+      }
+      // Excluir o pet
+      await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petDoc.id)
+          .delete();
     }
   }
 
@@ -71,14 +120,15 @@ class SyncService {
         .collection('users')
         .doc(user.uid)
         .collection('pets')
-        .doc(vaccine.petId.toString())
+        .doc(vaccine.petId.toString()) // O petId usado como doc do pet
         .collection('vaccines')
-        .add({
+        .doc(localId.toString()) // Usa o ID fixo da vacina
+        .set({
       'localId': localId,
       'name': vaccine.name,
       'date': vaccine.date,
       'nextDoseDate': vaccine.nextDoseDate,
-    });
+    }, SetOptions(merge: true));
   }
 
   Future<void> syncUpdateVaccine(Vaccine vaccine) async {
@@ -136,7 +186,14 @@ class SyncService {
   Future<void> syncNewMedicine(Medicine medicine, int localId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    await firestore.collection('users').doc(user.uid).collection('medicines').add({
+    await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('pets')
+        .doc(medicine.petId.toString()) // O documento do pet
+        .collection('medicines')
+        .doc(localId.toString()) // Define o ID fixo para o medicamento
+        .set({
       'localId': localId,
       'petId': medicine.petId,
       'name': medicine.name,
@@ -147,8 +204,9 @@ class SyncService {
       'startDate': medicine.startDate,
       'endDate': medicine.endDate,
       'notes': medicine.notes,
-    });
+    }, SetOptions(merge: true));
   }
+
 
   Future<void> syncUpdateMedicine(Medicine medicine) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -161,7 +219,13 @@ class SyncService {
         .get();
     if (snapshot.docs.isNotEmpty) {
       String docId = snapshot.docs.first.id;
-      await firestore.collection('users').doc(user.uid).collection('medicines').doc(docId).update({
+      firestore.collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(medicine.petId.toString())
+          .collection('medicines')
+          .doc(docId)
+          .update({
         'petId': medicine.petId,
         'name': medicine.name,
         'dosage': medicine.dosage,
@@ -175,22 +239,35 @@ class SyncService {
     }
   }
 
-  Future<void> syncDeleteMedicine(int localId) async {
+  Future<void> syncDeleteMedicine(int petLocalId, int medicineLocalId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     QuerySnapshot snapshot = await firestore
         .collection('users')
         .doc(user.uid)
+        .collection('pets')
+        .doc(petLocalId.toString())
         .collection('medicines')
-        .where('localId', isEqualTo: localId)
+        .where('localId', isEqualTo: medicineLocalId)
         .get();
     for (var doc in snapshot.docs) {
-      await firestore.collection('users').doc(user.uid).collection('medicines').doc(doc.id).delete();
+      await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petLocalId.toString())
+          .collection('medicines')
+          .doc(doc.id)
+          .delete();
     }
   }
+
   Future<void> downloadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
+    // Limpa os dados locais antes de sincronizar os novos
+    await DatabaseHelper().clearDatabase();
 
     // Instancia os repositórios para inserção local
     final petRepository = PetRepository(DatabaseHelper());
@@ -206,7 +283,6 @@ class SyncService {
 
     for (var petDoc in petSnapshots.docs) {
       final data = petDoc.data();
-      // Cria um objeto Pet (aqui, assumindo que 'localId' foi salvo no Firestore)
       Pet pet = Pet(
         id: data['localId'],
         name: data['name'],
@@ -214,15 +290,14 @@ class SyncService {
         breed: data['breed'],
         age: data['age'],
       );
-      // Insere o pet no SQLite (se necessário, implemente verificação para evitar duplicatas)
       await petRepository.insertPet(pet);
 
-      // Para cada pet, baixa as vacinas (supondo que cada vacina está em uma subcoleção "vaccines" no documento do pet)
+      // Vacinas
       final vaccineSnapshots = await firestore
           .collection('users')
           .doc(user.uid)
           .collection('pets')
-          .doc(petDoc.id)
+          .doc(petDoc.id)  // aqui, petDoc é definido no loop
           .collection('vaccines')
           .get();
       for (var vDoc in vaccineSnapshots.docs) {
@@ -236,29 +311,31 @@ class SyncService {
         );
         await vaccineRepository.insertVaccine(vaccine);
       }
-    }
 
-    // Baixa os medicamentos do Firestore (supondo que estão na coleção "medicines" no nível do usuário)
-    final medicineSnapshots = await firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('medicines')
-        .get();
-    for (var medDoc in medicineSnapshots.docs) {
-      final mData = medDoc.data();
-      Medicine medicine = Medicine(
-        id: mData['localId'],
-        petId: mData['petId'],
-        name: mData['name'],
-        dosage: mData['dosage'],
-        unit: mData['unit'],
-        administration: mData['administration'],
-        frequency: mData['frequency'],
-        startDate: mData['startDate'],
-        endDate: mData['endDate'],
-        notes: mData['notes'],
-      );
-      await medicineRepository.insertMedicine(medicine);
+      // Medicamentos
+      final medicineSnapshots = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petDoc.id)  // petDoc é definido no loop
+          .collection('medicines')
+          .get();
+      for (var mDoc in medicineSnapshots.docs) {
+        final mData = mDoc.data();
+        Medicine medicine = Medicine(
+          id: mData['localId'],
+          petId: mData['petId'],
+          name: mData['name'],
+          dosage: mData['dosage'],
+          unit: mData['unit'],
+          administration: mData['administration'],
+          frequency: mData['frequency'],
+          startDate: mData['startDate'],
+          endDate: mData['endDate'],
+          notes: mData['notes'],
+        );
+        await medicineRepository.insertMedicine(medicine);
+      }
     }
   }
 }

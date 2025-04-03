@@ -47,7 +47,7 @@ class MedicineRepository {
     }
   }
 
-  Future<int> deleteMedicine(int id) async {
+  Future<int> deleteMedicine(int id, int petId) async {
     final db = await databaseHelper.database;
     try {
       int result = await db.delete(
@@ -55,7 +55,8 @@ class MedicineRepository {
         where: '${MedicineContract.idColumn} = ?',
         whereArgs: [id],
       );
-      await syncService.syncDeleteMedicine(id);
+      // Passe petId (do medicamento) e id para a exclusão no Firestore
+      await syncService.syncDeleteMedicine(petId, id);
       return result;
     } catch (e) {
       print('Erro ao excluir medicamento: $e');
