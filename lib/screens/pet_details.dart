@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../database/models/pet.dart';
 import 'vacinas_pet_page.dart';
 import 'medicamentos_pet_page.dart';
+import 'evolution_page.dart';
 
 class PetDetails extends StatelessWidget {
   final Pet pet;
@@ -50,7 +51,13 @@ class PetDetails extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => MedicamentosPetPage(pet: pet)),
                     );
                   }),
-                  _buildCardButton(context, 'Evolução do Pet', Icons.description, () {}),
+                  _buildCardButton(context, 'Evolução do Pet', Icons.description, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EvolutionPage(pet: pet)),
+                    );
+                  })
+
                 ],
               ),
             ],

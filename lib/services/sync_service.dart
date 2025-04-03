@@ -3,9 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../database/models/pet.dart';
 import '../database/models/vaccine.dart';
 import '../database/models/medicine.dart';
+import '../database/models/evolution.dart';
 import '../database/repositories/pet_repository.dart';
 import '../database/repositories/vaccine_repository.dart';
 import '../database/repositories/medicine_repository.dart';
+import '../database/repositories/evolution_repository.dart';
 import '../database/helpers/database_helper.dart';
 
 class SyncService {
@@ -262,6 +264,81 @@ class SyncService {
     }
   }
 
+  // --- EVOLUTIONS ---
+// Sincroniza a criação de um registro de evolução para um pet
+  Future<void> syncNewEvolution(Evolution evolution, int localId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('pets')
+        .doc(evolution.petId.toString()) // O documento do pet (usando o ID local do pet convertido para string)
+        .collection('evolutions')
+        .doc(localId.toString()) // Usa o localId do registro de evolução como ID fixo
+        .set({
+      'localId': localId,
+      'petId': evolution.petId,
+      'weight': evolution.weight,
+      'date': evolution.date.toIso8601String(),
+      'notes': evolution.notes,
+    }, SetOptions(merge: true));
+  }
+
+// Atualiza um registro de evolução já existente
+  Future<void> syncUpdateEvolution(Evolution evolution) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || evolution.id == null) return;
+    QuerySnapshot snapshot = await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('pets')
+        .doc(evolution.petId.toString())
+        .collection('evolutions')
+        .where('localId', isEqualTo: evolution.id)
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      String docId = snapshot.docs.first.id;
+      await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(evolution.petId.toString())
+          .collection('evolutions')
+          .doc(docId)
+          .update({
+        'weight': evolution.weight,
+        'date': evolution.date.toIso8601String(),
+        'notes': evolution.notes,
+      });
+    }
+  }
+
+// Exclui um registro de evolução
+  Future<void> syncDeleteEvolution(int petLocalId, int evolutionLocalId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    QuerySnapshot snapshot = await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('pets')
+        .doc(petLocalId.toString())
+        .collection('evolutions')
+        .where('localId', isEqualTo: evolutionLocalId)
+        .get();
+    for (var doc in snapshot.docs) {
+      await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petLocalId.toString())
+          .collection('evolutions')
+          .doc(doc.id)
+          .delete();
+    }
+  }
+
+
   Future<void> downloadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -273,6 +350,7 @@ class SyncService {
     final petRepository = PetRepository(DatabaseHelper());
     final vaccineRepository = VaccineRepository(DatabaseHelper());
     final medicineRepository = MedicineRepository(DatabaseHelper());
+    final evolutionRepository = EvolutionRepository(DatabaseHelper());
 
     // Primeiro, baixa os pets do Firestore
     final petSnapshots = await firestore
@@ -335,6 +413,24 @@ class SyncService {
           notes: mData['notes'],
         );
         await medicineRepository.insertMedicine(medicine);
+      }
+      final evolutionSnapshots = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petDoc.id) // petDoc definido no loop
+          .collection('evolutions')
+          .get();
+      for (var evoDoc in evolutionSnapshots.docs) {
+        final evoData = evoDoc.data();
+        Evolution evolution = Evolution(
+          id: evoData['localId'], // campo salvo no Firestore
+          petId: evoData['petId'],
+          weight: evoData['weight'],
+          date: DateTime.parse(evoData['date']),
+          notes: evoData['notes'],
+        );
+        await evolutionRepository.insertEvolution(evolution);
       }
     }
   }

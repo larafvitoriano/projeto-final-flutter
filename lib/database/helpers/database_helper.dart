@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import '../contracts/pet_contract.dart';
 import '../contracts/vaccine_contract.dart';
 import '../contracts/medicine_contract.dart';
+import '../contracts/evolution_contract.dart';
 
 class DatabaseHelper {
   static Database? _database;
@@ -55,6 +56,16 @@ class DatabaseHelper {
               " ${MedicineContract.notesColumn} TEXT, "
               " FOREIGN KEY (${MedicineContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
         );
+        await db.execute(
+            "CREATE TABLE ${EvolutionContract.evolutionTable}("
+                " ${EvolutionContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
+                " ${EvolutionContract.petIdColumn} INTEGER, "
+                " ${EvolutionContract.weightColumn} REAL, "
+                " ${EvolutionContract.dateColumn} TEXT, "
+                " ${EvolutionContract.notesColumn} TEXT, "
+                " FOREIGN KEY (${EvolutionContract.petIdColumn}) REFERENCES pets(id))"
+        );
+
       },
     );
   }
