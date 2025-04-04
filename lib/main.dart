@@ -31,6 +31,43 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [
         Locale('pt', 'BR'),
       ],
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue[300],
+          titleTextStyle: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue[300],
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue[300]!, width: 2.0),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          labelStyle: const TextStyle(color: Colors.grey),
+          prefixIconColor: Colors.blue[300],
+        ),
+        dialogTheme: DialogTheme(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Colors.blue[300],
+        ),
+      ),
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -51,13 +88,11 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[300],
         title: const Text(
           'CuidaPet',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         actions: [
           IconButton(
@@ -81,18 +116,18 @@ class MyHomePage extends StatelessWidget {
               decoration: BoxDecoration(color: Colors.blue[300]),
               child: const Text(
                 'Menu',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
               ),
             ),
             ListTile(
-              leading: Icon(Icons.home, color: Colors.green[500]),
+              leading: Icon(Icons.home, color: Colors.blue[300]), // Ícone azul
               title: const Text('Início'),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.pets, color: Colors.green[500]),
+              leading: Icon(Icons.pets, color: Colors.blue[300]), // Ícone azul
               title: const Text('Meus Pets'),
               onTap: () {
                 Navigator.push(
@@ -102,7 +137,7 @@ class MyHomePage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.calendar_month, color: Colors.green[500]),
+              leading: Icon(Icons.calendar_month, color: Colors.blue[300]), // Ícone azul
               title: const Text('Calendário'),
               onTap: () {
                 Navigator.push(
@@ -112,14 +147,7 @@ class MyHomePage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.ring_volume, color: Colors.green[500]),
-              title: const Text('Notificações'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.logout, color: Colors.green[500]),
+              leading: Icon(Icons.logout, color: Colors.blue[300]), // Ícone azul
               title: const Text('Sair'),
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
@@ -153,10 +181,6 @@ class MyHomePage extends StatelessWidget {
                     const SizedBox(width: 16.0),
                     Expanded(
                       child: _buildCardButton(context, 'Calendário', Icons.calendar_month, CalendarScreen()),
-                    ),
-                    const SizedBox(width: 16.0),
-                    Expanded(
-                      child: _buildCardButton(context, 'Notificações', Icons.ring_volume, CalendarScreen()),
                     ),
                   ],
                 ),

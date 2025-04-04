@@ -46,14 +46,31 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
             return const Center(child: Text('Erro ao carregar os pets'));
           } else if (snapshot.hasData) {
             final pets = snapshot.data!;
-            return ListView.builder(
-              itemCount: pets.length,
-              itemBuilder: (context, index) {
-                return _buildPetCard(pets[index]);
-              },
-            );
+            if (pets.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Nenhum pet cadastrado. Clique no botão para cadastrar um pet.',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            } else {
+              return ListView.builder(
+                itemCount: pets.length,
+                itemBuilder: (context, index) {
+                  return _buildPetCard(pets[index]);
+                },
+              );
+            }
           } else {
-            return const Center(child: Text('Nenhum pet cadastrado. Clique no botão para cadastrar um pet.'));
+            return const Center(child: Text('Erro ao carregar os pets'));
           }
         },
       ),
@@ -90,7 +107,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: <Widget>[
-              _buildPetImage(pet), // Adiciona a imagem do pet
+              _buildPetImage(pet),
               const SizedBox(width: 16.0),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +119,6 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
                   Text(pet.species),
                   Text(pet.sex),
                   Text(pet.breed),
-                  Text('${pet.age}'),
                 ],
               ),
             ],

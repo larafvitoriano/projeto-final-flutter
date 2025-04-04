@@ -18,7 +18,7 @@ class PetActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(pet.name),
+        title: Text('Informações do Pet'),
         backgroundColor: Colors.blue[300],
       ),
       body: Center(
@@ -29,10 +29,12 @@ class PetActions extends StatelessWidget {
             children: <Widget>[
               _buildPetImage(),
               const SizedBox(height: 16),
-              Text(pet.name, style: const TextStyle(fontSize: 24, color: Colors.black)),
+              Text(pet.name, style: TextStyle(fontSize: 24, color: Colors.blue[300])),
               const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Wrap( // Usando Wrap para melhor layout responsivo
+                spacing: 16.0, // Espaçamento horizontal entre os cards
+                runSpacing: 16.0, // Espaçamento vertical entre as linhas
+                alignment: WrapAlignment.center, // Centraliza os cards
                 children: <Widget>[
                   _buildCardButton(context, 'Perfil', Icons.pets, () {
                     Navigator.push(
@@ -40,36 +42,30 @@ class PetActions extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => PetProfilePage(pet: pet)),
                     );
                   }),
-                  _buildCardButton(context, 'Vacinas', Icons.calendar_today, () {
+                  _buildCardButton(context, 'Vacinas', Icons.vaccines, () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => VacinasPetPage(pet: pet)),
                     );
                   }),
-                  _buildCardButton(context, 'Exames', Icons.calendar_today, () {
-                  Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ExamsPetPage(pet: pet)),
-                  );}),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _buildCardButton(context, 'Medicamentos', Icons.medical_information_rounded, () {
+                  _buildCardButton(context, 'Exames', Icons.medical_information, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ExamsPetPage(pet: pet)),
+                    );
+                  }),
+                  _buildCardButton(context, 'Medicamentos', Icons.medication, () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => MedicamentosPetPage(pet: pet)),
                     );
                   }),
-                  _buildCardButton(context, 'Evolução do Pet', Icons.description, () {
+                  _buildCardButton(context, 'Evolução', Icons.show_chart, () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => EvolutionPage(pet: pet)),
                     );
-                  })
-
+                  }),
                 ],
               ),
             ],
@@ -83,21 +79,29 @@ class PetActions extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 120,
-        height: 80,
+        width: 150, // Aumentando a largura para melhor visualização
+        height: 100, // Aumentando a altura para melhor visualização
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12), // Arredondando mais os cantos
+          boxShadow: [ // Adicionando sombra para dar profundidade
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(icon, size: 30, color: Colors.blue[900]),
+            Icon(icon, size: 35, color: Colors.blue[300]), // Aumentando o tamanho do ícone
             const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.blue),
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500), // Adicionando peso à fonte
             ),
           ],
         ),
@@ -108,14 +112,14 @@ class PetActions extends StatelessWidget {
   Widget _buildPetImage() {
     if (pet.pictureFile.isNotEmpty) {
       return CircleAvatar(
-        radius: 50,
+        radius: 60, // Aumentando o raio da imagem
         backgroundImage: FileImage(File(pet.pictureFile)),
       );
     } else {
       return const CircleAvatar(
-        radius: 50,
+        radius: 60,
         backgroundColor: Colors.grey,
-        child: Icon(Icons.pets, size: 50, color: Colors.white),
+        child: Icon(Icons.pets, size: 60, color: Colors.white), // Aumentando o tamanho do ícone
       );
     }
   }
