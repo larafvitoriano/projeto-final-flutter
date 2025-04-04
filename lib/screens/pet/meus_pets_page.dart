@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../database/helpers/database_helper.dart';
-import '../database/models/pet.dart';
-import '../database/repositories/pet_repository.dart';
+import '../../database/helpers/database_helper.dart';
+import '../../database/models/pet.dart';
+import '../../database/repositories/pet_repository.dart';
 import 'pet_form.dart';
-import 'pet_details.dart';
+import 'pet_actions.dart';
 
 class MeusPetsPage extends StatefulWidget {
   @override
@@ -12,11 +12,20 @@ class MeusPetsPage extends StatefulWidget {
 
 class _MeusPetsPageState extends State<MeusPetsPage> {
   late PetRepository _petRepository;
+  late Future<List<Pet>> _petsFuture; // Armazena o Future
 
   @override
   void initState() {
     super.initState();
     _petRepository = PetRepository(DatabaseHelper());
+    _petsFuture = _petRepository.getPets();
+  }
+
+  // Função para atualizar o Future
+  void _refreshPets() {
+    setState(() {
+      _petsFuture = _petRepository.getPets();
+    });
   }
 
   @override
@@ -27,7 +36,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
         backgroundColor: Colors.blue[300],
       ),
       body: FutureBuilder<List<Pet>>(
-        future: _petRepository.getPets(),
+        future: _petsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -52,7 +61,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
             context,
             MaterialPageRoute(builder: (context) => PetForm()),
           ).then((_) {
-            setState(() {});
+            _refreshPets();
           });
         },
         child: const Icon(Icons.add),
@@ -65,9 +74,9 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PetDetails(pet: pet)),
+          MaterialPageRoute(builder: (context) => PetActions(pet: pet)),
         ).then((_) {
-          setState(() {});
+          _refreshPets();
         });
       },
       onLongPress: () {
@@ -93,6 +102,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
                     style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                   ),
                   Text(pet.species),
+                  Text(pet.sex),
                   Text(pet.breed),
                   Text('${pet.age} anos'),
                 ],
@@ -123,11 +133,10 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
               onPressed: () async {
                 await _petRepository.deletePet(pet.id!);
                 Navigator.of(context).pop();
-                setState(() {
+                _refreshPets();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Pet excluído com sucesso!')),
                   );
-                });
               },
             ),
           ],

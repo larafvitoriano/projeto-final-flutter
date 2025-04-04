@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/meus_pets_page.dart';
+import 'screens/pet/meus_pets_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../database/models/pet.dart';
+import '../../database/models/pet.dart';
 import 'vacinas_form.dart';
-import '../database/models/vaccine.dart';
-import '../database/repositories/vaccine_repository.dart';
-import '../database/helpers/database_helper.dart';
+import '../../database/models/vaccine.dart';
+import '../../database/repositories/vaccine_repository.dart';
+import '../../database/helpers/database_helper.dart';
 
 class VacinasPetPage extends StatefulWidget {
   final Pet pet;

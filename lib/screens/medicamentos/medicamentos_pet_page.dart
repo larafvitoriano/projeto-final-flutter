@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../database/helpers/database_helper.dart';
-import '../database/models/medicine.dart';
-import '../database/models/pet.dart';
-import '../database/repositories/medicine_repository.dart';
+import '../../database/helpers/database_helper.dart';
+import '../../database/models/medicine.dart';
+import '../../database/models/pet.dart';
+import '../../database/repositories/medicine_repository.dart';
 import 'medicamentos_form.dart';
 
 class MedicamentosPetPage extends StatefulWidget {

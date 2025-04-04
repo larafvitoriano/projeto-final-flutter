@@ -19,6 +19,7 @@ class DatabaseHelper {
     await db.delete(PetContract.petTable);
     await db.delete(VaccineContract.vaccineTable);
     await db.delete(MedicineContract.medicineTable);
+    await db.delete(EvolutionContract.evolutionTable);
   }
 
   Future<Database> _initDatabase() async {
@@ -26,14 +27,18 @@ class DatabaseHelper {
     String path = join(databasesPath, "pets.db");
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: (Database db, int newerVersion) async {
         await db.execute(
           "CREATE TABLE ${PetContract.petTable}(${PetContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
               " ${PetContract.nameColumn} TEXT, "
               " ${PetContract.speciesColumn} TEXT, "
               " ${PetContract.breedColumn} TEXT, "
-              " ${PetContract.ageColumn} INTEGER)",
+              " ${PetContract.sexColumn} TEXT, "
+              " ${PetContract.ageColumn} INTEGER, "
+              " ${PetContract.weightColumn} REAL, "
+              " ${PetContract.allergyColumn} TEXT, "
+              " ${PetContract.observationsColumn} TEXT)",
         );
         await db.execute(
           "CREATE TABLE ${VaccineContract.vaccineTable}(${VaccineContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -63,9 +68,8 @@ class DatabaseHelper {
                 " ${EvolutionContract.weightColumn} REAL, "
                 " ${EvolutionContract.dateColumn} TEXT, "
                 " ${EvolutionContract.notesColumn} TEXT, "
-                " FOREIGN KEY (${EvolutionContract.petIdColumn}) REFERENCES pets(id))"
+                " FOREIGN KEY (${EvolutionContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))"
         );
-
       },
     );
   }
