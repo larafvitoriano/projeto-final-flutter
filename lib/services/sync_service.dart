@@ -32,14 +32,16 @@ class SyncService {
         .doc(localId.toString()) // Usa o ID fixo (localId)
         .set({
           'localId': localId,
+          'pictureFile': pet.pictureFile,
           'name': pet.name,
           'species': pet.species,
           'breed': pet.breed,
           'sex': pet.sex,
+          'birthDate': pet.birthDate,
           'age': pet.age,
           'weight': pet.weight,
           'allergy': pet.allergy,
-          'observations': pet.observations,
+          'notes': pet.notes,
         }, SetOptions(merge: true));
   }
 
@@ -61,14 +63,16 @@ class SyncService {
           .collection('pets')
           .doc(docId)
           .update({
+            'pictureFile': pet.pictureFile,
             'name': pet.name,
             'species': pet.species,
             'breed': pet.breed,
             'sex': pet.sex,
+            'birthDate': pet.birthDate,
             'age': pet.age,
             'weight': pet.weight,
             'allergy': pet.allergy,
-            'observations': pet.observations,
+            'notes': pet.notes,
           });
     }
   }
@@ -491,14 +495,16 @@ class SyncService {
       final data = petDoc.data();
       Pet pet = Pet(
         id: data['localId'],
+        pictureFile: data['pictureFile'],
         name: data['name'],
         species: data['species'],
         breed: data['breed'],
         sex: data['sex'],
+        birthDate: data['birthDate'],
         age: data['age'],
         weight: data['weight'],
         allergy: data['allergy'],
-        observations: data['observations'],
+        notes: data['notes'],
       );
       await petRepository.insertPet(pet);
 

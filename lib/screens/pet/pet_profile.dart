@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'dart:io';
 import '../../database/models/pet.dart';
-
 import '.../../pet_form.dart';
 
 class PetProfilePage extends StatefulWidget {
@@ -72,16 +71,25 @@ class _PetProfilePageState extends State<PetProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // const CircleAvatar(
-          //   radius: 50,
-          //   backgroundImage: AssetImage('assets/ed.jpg'),
-          // ),
+          CircleAvatar(
+            radius: 100,
+            backgroundImage: pet.pictureFile.isNotEmpty
+                ? FileImage(File(pet.pictureFile))
+                : null,
+            backgroundColor: pet.pictureFile.isNotEmpty
+                ? null
+                : Colors.grey[200],
+            child: pet.pictureFile.isNotEmpty
+                ? null
+                : const Icon(Icons.pets, size: 80, color: Colors.grey),
+          ),
           const SizedBox(height: 16),
           _buildInfoRow('Nome', pet.name),
           _buildInfoRow('Espécie', pet.species),
           _buildInfoRow('Raça', pet.breed),
           _buildInfoRow('Sexo', pet.sex),
-          _buildInfoRow('Idade', '${pet.age} anos'),
+          _buildInfoRow('Data de Nascimento', pet.birthDate),
+          _buildInfoRow('Idade', '${pet.age}'),
         ],
       ),
     );
@@ -93,11 +101,11 @@ class _PetProfilePageState extends State<PetProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (pet.weight != null) _buildInfoRow('Peso', '${pet.weight} kg'),
+          if (pet.weight != null) _buildInfoRow('Peso', '${pet.weight}'),
           if (pet.allergy != null && pet.allergy!.isNotEmpty)
             _buildInfoRow('Alergia', pet.allergy!),
-          if (pet.observations != null && pet.observations!.isNotEmpty)
-            _buildInfoRow('Observações', pet.observations!),
+          if (pet.notes != null && pet.notes!.isNotEmpty)
+            _buildInfoRow('Observações', pet.notes!),
         ],
       ),
     );

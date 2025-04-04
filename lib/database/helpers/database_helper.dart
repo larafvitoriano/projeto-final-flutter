@@ -29,18 +29,20 @@ class DatabaseHelper {
     String path = join(databasesPath, "pets.db");
     return await openDatabase(
       path,
-      version: 4,
+      version: 1,
       onCreate: (Database db, int newerVersion) async {
         await db.execute(
           "CREATE TABLE ${PetContract.petTable}(${PetContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
+              " ${PetContract.pictureFileColumn} BLOB, "
               " ${PetContract.nameColumn} TEXT, "
               " ${PetContract.speciesColumn} TEXT, "
               " ${PetContract.breedColumn} TEXT, "
               " ${PetContract.sexColumn} TEXT, "
+              " ${PetContract.birthDateColumn} TEXT, "
               " ${PetContract.ageColumn} INTEGER, "
               " ${PetContract.weightColumn} REAL, "
               " ${PetContract.allergyColumn} TEXT, "
-              " ${PetContract.observationsColumn} TEXT)",
+              " ${PetContract.notesColumn} TEXT)",
         );
         await db.execute(
           "CREATE TABLE ${VaccineContract.vaccineTable}(${VaccineContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -83,19 +85,6 @@ class DatabaseHelper {
               " FOREIGN KEY (${ExamContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
         );
       },
-      onUpgrade: (Database db, int oldVersion, int newVersion) async{
-    if(oldVersion < 4){
-    await db.execute(
-    "CREATE TABLE ${ExamContract.examsTable}(${ExamContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
-    " ${ExamContract.petIdColumn} INTEGER, "
-    " ${ExamContract.nameColumn} TEXT, "
-    " ${ExamContract.dateColumn} TEXT, "
-    " ${ExamContract.pdfFileColumn} BLOB, "
-        " ${ExamContract.notesColumn} TEXT, "
-    " FOREIGN KEY (${ExamContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
-    );
-    }
-    }
     );
   }
 }

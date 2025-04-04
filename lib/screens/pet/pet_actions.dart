@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:projeto_final_flutter/screens/exames/exams_form.dart';
 import 'package:projeto_final_flutter/screens/exames/exams_pet_page.dart';
@@ -25,10 +27,7 @@ class PetActions extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // const CircleAvatar(
-                // radius: 50,
-                // backgroundImage: AssetImage('assets/ed.jpg'),
-             // ),
+              _buildPetImage(),
               const SizedBox(height: 16),
               Text(pet.name, style: const TextStyle(fontSize: 24, color: Colors.black)),
               const SizedBox(height: 32),
@@ -104,5 +103,20 @@ class PetActions extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildPetImage() {
+    if (pet.pictureFile.isNotEmpty) {
+      return CircleAvatar(
+        radius: 50,
+        backgroundImage: FileImage(File(pet.pictureFile)),
+      );
+    } else {
+      return const CircleAvatar(
+        radius: 50,
+        backgroundColor: Colors.grey,
+        child: Icon(Icons.pets, size: 50, color: Colors.white),
+      );
+    }
   }
 }

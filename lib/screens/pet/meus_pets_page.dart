@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../database/helpers/database_helper.dart';
 import '../../database/models/pet.dart';
@@ -51,7 +53,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
               },
             );
           } else {
-            return const Center(child: Text('Nenhum pet cadastrado'));
+            return const Center(child: Text('Nenhum pet cadastrado. Clique no botão para cadastrar um pet.'));
           }
         },
       ),
@@ -88,11 +90,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: <Widget>[
-              Container(
-                width: 80.0,
-                height: 80.0,
-                color: Colors.grey[300],
-              ),
+              _buildPetImage(pet), // Adiciona a imagem do pet
               const SizedBox(width: 16.0),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +102,7 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
                   Text(pet.species),
                   Text(pet.sex),
                   Text(pet.breed),
-                  Text('${pet.age} anos'),
+                  Text('${pet.age}'),
                 ],
               ),
             ],
@@ -112,6 +110,32 @@ class _MeusPetsPageState extends State<MeusPetsPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildPetImage(Pet pet) {
+    if (pet.pictureFile.isNotEmpty) {
+      return Container(
+        width: 80.0,
+        height: 80.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: FileImage(File(pet.pictureFile)),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: 80.0,
+        height: 80.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.grey[300],
+        ),
+        child: const Icon(Icons.pets, size: 40, color: Colors.white),
+      );
+    }
   }
 
   void _showDeleteConfirmationDialog(BuildContext context, Pet pet) {

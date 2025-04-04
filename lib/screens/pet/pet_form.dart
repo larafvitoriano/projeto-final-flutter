@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../database/models/pet.dart';
 import '../../database/repositories/pet_repository.dart';
 import '../../database/helpers/database_helper.dart';
@@ -18,14 +21,16 @@ class _PetFormState extends State<PetForm> {
   final _nameController = TextEditingController();
   final _speciesController = TextEditingController();
   final _breedController = TextEditingController();
-  final _ageController = TextEditingController();
+  final _birthDateController = TextEditingController();
   final _weightController = TextEditingController();
   final _allergyController = TextEditingController();
-  final _observationsController = TextEditingController();
+  final _notesController = TextEditingController();
+  File? _image;
 
   late PetRepository _petRepository;
-  int _currentStep = 0; // Etapa atual
-  String _sex = 'Macho'; // Valor padrão
+  int _currentStep = 0;
+  String _sex = 'Macho';
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -35,11 +40,14 @@ class _PetFormState extends State<PetForm> {
       _nameController.text = widget.pet!.name;
       _speciesController.text = widget.pet!.species;
       _breedController.text = widget.pet!.breed;
-      _sex = widget.pet!.sex ?? 'Macho'; // Define o sexo existente ou padrão
-      _ageController.text = widget.pet!.age.toString();
+      _sex = widget.pet!.sex ?? 'Macho';
+      _birthDateController.text = widget.pet!.birthDate;
       _weightController.text = widget.pet!.weight?.toString() ?? '';
       _allergyController.text = widget.pet!.allergy ?? '';
-      _observationsController.text = widget.pet!.observations ?? '';
+      _notesController.text = widget.pet!.notes ?? '';
+      if (widget.pet!.pictureFile.isNotEmpty) {
+        _image = File(widget.pet!.pictureFile);
+      }
     }
   }
 
@@ -48,11 +56,48 @@ class _PetFormState extends State<PetForm> {
     _nameController.dispose();
     _speciesController.dispose();
     _breedController.dispose();
-    _ageController.dispose();
+    _birthDateController.dispose();
     _weightController.dispose();
     _allergyController.dispose();
-    _observationsController.dispose();
+    _notesController.dispose();
     super.dispose();
+  }
+
+  String? _validateDate(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira uma data';
+    }
+    final dateRegex = RegExp(r'^\d{2}/\d{2}/\d{4}$');
+    if (!dateRegex.hasMatch(value)) {
+      return 'Formato de data inválido (dd/MM/yyyy)';
+    }
+    return null;
+  }
+
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      locale: const Locale('pt', 'BR'),
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+    );
+    if (picked != null) {
+      final formattedDate = DateFormat('dd/MM/yyyy').format(picked);
+      controller.text = formattedDate;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
   }
 
   @override
@@ -91,34 +136,68 @@ class _PetFormState extends State<PetForm> {
                   });
                 } else {
                   if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      _isLoading = true; // Inicia o loading
+                    });
+
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                    );
                     final pet = Pet(
                       id: widget.isEditing ? widget.pet?.id : null,
+                      pictureFile: _image?.path ?? '',
                       name: _nameController.text,
                       species: _speciesController.text,
                       breed: _breedController.text,
                       sex: _sex,
-                      age: int.parse(_ageController.text),
-                      weight: _weightController.text.isNotEmpty ? double.tryParse(_weightController.text) : null,
+                      birthDate: _birthDateController.text,
+                      weight: _weightController.text.isNotEmpty ? double
+                          .tryParse(_weightController.text) : null,
                       allergy: _allergyController.text,
-                      observations: _observationsController.text,
+                      notes: _notesController.text,
                     );
-                    if (widget.pet == null) {
-                      await _petRepository.insertPet(pet);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Pet cadastrado com sucesso!')),
-                      );
-                    } else {
-                      await _petRepository.updatePet(pet);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Pet atualizado com sucesso!')),
-                      );
+
+                    try {
+                      if (widget.pet == null) {
+                        await _petRepository.insertPet(pet);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text(
+                              'Pet cadastrado com sucesso!')),
+                        );
+                      } else {
+                        await _petRepository.updatePet(pet);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text(
+                              'Pet atualizado com sucesso!')),
+                        );
+                      }
+                      Navigator.pop(context, pet);
+                    } finally {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      Navigator.of(context).pop();
                     }
-                    Navigator.pop(context, pet);
                   }
                 }
               },
-              child: Text(_currentStep < 1 ? 'Próximo' : (widget.isEditing ? 'Atualizar' : 'Cadastrar')),
-            ),
+              child: _isLoading
+              ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+    )
+        : Text(_currentStep < 1 ? 'Próximo' : (widget.isEditing ? 'Atualizar' : 'Cadastrar')),
+    ),
+
           ],
         ),
       ),
@@ -141,6 +220,8 @@ class _PetFormState extends State<PetForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          _buildImageStep(),
+          const SizedBox(height: 12.0),
           _buildTextFormField(
             controller: _nameController,
             labelText: 'Nome',
@@ -170,12 +251,11 @@ class _PetFormState extends State<PetForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildTextFormField(
-            controller: _ageController,
-            labelText: 'Idade',
-            icon: Icons.calendar_today,
-            keyboardType: TextInputType.number,
-          ),
+        _buildDateFormField(
+        controller: _birthDateController, // Novo campo
+        labelText: 'Data de Nascimento',
+        icon: Icons.calendar_today,
+        ),
           const SizedBox(height: 12.0),
           _buildTextFormField(
             controller: _weightController,
@@ -191,7 +271,7 @@ class _PetFormState extends State<PetForm> {
           ),
           const SizedBox(height: 12.0),
           _buildTextFormField(
-            controller: _observationsController,
+            controller: _notesController,
             labelText: 'Observações',
             icon: Icons.description,
             maxLines: 3,
@@ -228,6 +308,33 @@ class _PetFormState extends State<PetForm> {
     );
   }
 
+  Widget _buildImageStep() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          GestureDetector(
+            onTap: _pickImage,
+            child: Container(
+              height: 150,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: _image != null
+                  ? Image.file(
+                _image!,
+                fit: BoxFit.cover,
+              )
+                  : const Center(child: Text('Toque para adicionar uma imagem')),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSexRadioButtons() {
     return Row(
       children: <Widget>[
@@ -255,4 +362,23 @@ class _PetFormState extends State<PetForm> {
       ],
     );
   }
+
+  Widget _buildDateFormField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+      ),
+      readOnly: true,
+      onTap: () => _selectDate(context, controller),
+      validator: _validateDate,
+    );
+  }
 }
+
