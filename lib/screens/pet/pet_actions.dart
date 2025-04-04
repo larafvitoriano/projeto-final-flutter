@@ -25,10 +25,10 @@ class PetActions extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const CircleAvatar(
-                radius: 50,
-                backgroundImage: AssetImage('assets/ed.jpg'),
-              ),
+              // const CircleAvatar(
+                // radius: 50,
+                // backgroundImage: AssetImage('assets/ed.jpg'),
+             // ),
               const SizedBox(height: 16),
               Text(pet.name, style: const TextStyle(fontSize: 24, color: Colors.black)),
               const SizedBox(height: 32),

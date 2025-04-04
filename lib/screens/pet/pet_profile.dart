@@ -72,10 +72,10 @@ class _PetProfilePageState extends State<PetProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage('assets/ed.jpg'),
-          ),
+          // const CircleAvatar(
+          //   radius: 50,
+          //   backgroundImage: AssetImage('assets/ed.jpg'),
+          // ),
           const SizedBox(height: 16),
           _buildInfoRow('Nome', pet.name),
           _buildInfoRow('Espécie', pet.species),
