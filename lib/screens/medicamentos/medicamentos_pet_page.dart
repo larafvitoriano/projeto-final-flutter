@@ -99,7 +99,7 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
                 children: [
                   const Icon(Icons.medical_services, color: Colors.grey, size: 18),
                   const SizedBox(width: 5),
-                  Text('Dosagem: ${medicine.dosage} ${medicine.unit}'),
+                  Text('Dosagem: ${medicine.dosage} ${medicine.unit ?? ''}'),
                 ],
               ),
               Row(

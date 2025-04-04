@@ -19,6 +19,7 @@ class _MedicamentosFormState extends State<MedicamentosForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _dosageController = TextEditingController();
+  String? _selectedUnit;
   final _unitController = TextEditingController();
   final _administrationController = TextEditingController();
   final _frequencyController = TextEditingController();
@@ -27,7 +28,7 @@ class _MedicamentosFormState extends State<MedicamentosForm> {
   final _notesController = TextEditingController();
 
   late MedicineRepository _medicineRepository;
-  int _currentStep = 0; // Etapa atual
+  int _currentStep = 0;
 
   @override
   void initState() {
@@ -88,14 +89,22 @@ class _MedicamentosFormState extends State<MedicamentosForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.medicine == null ? 'Cadastrar Medicamento' : 'Editar Medicamento'),
-        backgroundColor: Colors.orange[300],
+        title: Text(widget.medicine == null ? 'Cadastrar Medicamento' : 'Editar Medicamento', style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blue[300],
+        elevation: 2,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: _buildStep(_currentStep), // Usa _buildStep
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: _buildStep(_currentStep),
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: Padding(
@@ -104,50 +113,67 @@ class _MedicamentosFormState extends State<MedicamentosForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             if (_currentStep > 0)
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _currentStep--;
-                  });
-                },
-                child: const Text('Anterior'),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentStep--;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[400],
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('Anterior'),
+                ),
               ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_currentStep < 1) {
-                  setState(() {
-                    _currentStep++;
-                  });
-                } else {
-                  if (_formKey.currentState!.validate()) {
-                    final medicine = Medicine(
-                      id: widget.medicine?.id,
-                      petId: widget.pet.id!,
-                      name: _nameController.text,
-                      dosage: double.parse(_dosageController.text),
-                      unit: _unitController.text,
-                      administration: _administrationController.text,
-                      frequency: _frequencyController.text,
-                      startDate: _startDateController.text,
-                      endDate: _endDateController.text.isNotEmpty ? _endDateController.text : null,
-                      notes: _notesController.text.isNotEmpty ? _notesController.text : null,
-                    );
-                    if (widget.medicine == null) {
-                      await _medicineRepository.insertMedicine(medicine);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Medicamento cadastrado com sucesso!')),
+            const SizedBox(width: 16.0),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_currentStep < 1) {
+                    setState(() {
+                      _currentStep++;
+                    });
+                  } else {
+                    if (_formKey.currentState!.validate()) {
+                      final medicine = Medicine(
+                        id: widget.medicine?.id,
+                        petId: widget.pet.id!,
+                        name: _nameController.text,
+                        dosage: double.parse(_dosageController.text),
+                        unit: _unitController.text,
+                        administration: _administrationController.text,
+                        frequency: _frequencyController.text,
+                        startDate: _startDateController.text,
+                        endDate: _endDateController.text.isNotEmpty ? _endDateController.text : null,
+                        notes: _notesController.text.isNotEmpty ? _notesController.text : null,
                       );
-                    } else {
-                      await _medicineRepository.updateMedicine(medicine);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Medicamento atualizado com sucesso!')),
-                      );
+                      if (widget.medicine == null) {
+                        await _medicineRepository.insertMedicine(medicine);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Medicamento cadastrado com sucesso!')),
+                        );
+                      } else {
+                        await _medicineRepository.updateMedicine(medicine);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Medicamento atualizado com sucesso!')),
+                        );
+                      }
+                      Navigator.pop(context);
                     }
-                    Navigator.pop(context);
                   }
-                }
-              },
-              child: Text(_currentStep < 1 ? 'Próximo' : (widget.medicine == null ? 'Cadastrar' : 'Atualizar')),
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[300],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: Text(_currentStep < 1 ? 'Próximo' : (widget.medicine == null ? 'Cadastrar' : 'Atualizar')),
+              ),
             ),
           ],
         ),
@@ -171,31 +197,63 @@ class _MedicamentosFormState extends State<MedicamentosForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildTextFormField(
-            controller: _nameController,
-            labelText: 'Nome',
-            icon: Icons.medical_services,
+          _buildTextFormField(controller: _nameController, labelText: 'Nome', icon: Icons.medical_services),
+          const SizedBox(height: 12.0),
+          Row(
+            children: [
+              Expanded( // Adicionado Expanded aqui
+                child: _buildTextFormField(
+                  controller: _dosageController,
+                  labelText: 'Dosagem',
+                  icon: Icons.format_list_numbered,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              Expanded( // Adicionado Expanded aqui
+                child: _buildUnitDropdown(),
+              ),
+            ],
           ),
           const SizedBox(height: 12.0),
-          _buildTextFormField(
-            controller: _dosageController,
-            labelText: 'Dosagem',
-            icon: Icons.format_list_numbered,
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 12.0),
-          _buildTextFormField(
-            controller: _unitController,
-            labelText: 'Unidade',
-            icon: Icons.scale,
-          ),
-          const SizedBox(height: 12.0),
-          _buildTextFormField(
-            controller: _administrationController,
-            labelText: 'Via de Administração',
-            icon: Icons.healing,
-          ),
+          _buildTextFormField(controller: _administrationController, labelText: 'Via de Administração', icon: Icons.healing),
+          // ... (outros campos)
         ],
+      ),
+    );
+  }
+
+  Widget _buildUnitDropdown() {
+    return Flexible(
+      flex: 1, // Simula o comportamento do Expanded
+      child: DropdownButtonFormField<String>(
+        isExpanded: true, // Adicionado isExpanded aqui
+        value: _selectedUnit,
+        items: <String>['mg', 'ml', 'cápsulas', 'comprimidos', 'gotas']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            _selectedUnit = newValue;
+          });
+        },
+        decoration: InputDecoration(
+          labelText: 'Unidade',
+          hintText: "Selecione a unidade",
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+          focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue[300]!), borderRadius: BorderRadius.circular(8.0)),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Selecione a unidade.';
+          }
+          return null;
+        },
       ),
     );
   }
@@ -205,50 +263,26 @@ class _MedicamentosFormState extends State<MedicamentosForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildTextFormField(
-            controller: _frequencyController,
-            labelText: 'Frequência',
-            icon: Icons.timelapse,
-          ),
+          _buildTextFormField(controller: _frequencyController, labelText: 'Frequência', icon: Icons.timelapse),
           const SizedBox(height: 12.0),
-          _buildDateFormField(
-            controller: _startDateController,
-            labelText: 'Data de Início',
-            icon: Icons.calendar_today,
-          ),
+          _buildDateFormField(controller: _startDateController, labelText: 'Data de Início', icon: Icons.calendar_today),
           const SizedBox(height: 12.0),
-          _buildDateFormField(
-            controller: _endDateController,
-            labelText: 'Data de Término',
-            icon: Icons.calendar_today,
-          ),
+          _buildDateFormField(controller: _endDateController, labelText: 'Data de Término', icon: Icons.calendar_today),
           const SizedBox(height: 12.0),
-          _buildTextFormField(
-            controller: _notesController,
-            labelText: 'Observações',
-            icon: Icons.note,
-            maxLines: 3,
-          ),
+          _buildTextFormField(controller: _notesController, labelText: 'Observações', icon: Icons.note, maxLines: 3),
         ],
       ),
     );
   }
 
-  Widget _buildTextFormField({
-    required TextEditingController controller,
-    required String labelText,
-    required IconData icon,
-    TextInputType? keyboardType,
-    int? maxLines,
-  }) {
+  Widget _buildTextFormField({required TextEditingController controller, required String labelText, required IconData icon, TextInputType? keyboardType, int? maxLines}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+        prefixIcon: Icon(icon, color: Colors.blue[300]),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue[300]!), borderRadius: BorderRadius.circular(8.0)),
       ),
       keyboardType: keyboardType,
       maxLines: maxLines,
@@ -261,17 +295,14 @@ class _MedicamentosFormState extends State<MedicamentosForm> {
     );
   }
 
-  Widget _buildDateFormField({
-    required TextEditingController controller,
-    required String labelText,
-    required IconData icon,
-  }) {
+  Widget _buildDateFormField({required TextEditingController controller, required String labelText, required IconData icon}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(icon, color: Colors.blue[300]),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue[300]!), borderRadius: BorderRadius.circular(8.0)),
       ),
       readOnly: true,
       onTap: () => _selectDate(context, controller),
