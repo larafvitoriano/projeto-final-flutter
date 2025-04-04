@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import '../database/models/pet.dart';
-import 'vacinas_pet_page.dart';
-import 'medicamentos_pet_page.dart';
-import 'evolution_page.dart';
+import 'package:projeto_final_flutter/screens/pet/pet_profile.dart';
+import '../../database/models/pet.dart';
+import '../vacinas/vacinas_pet_page.dart';
+import '../medicamentos/medicamentos_pet_page.dart';
+import '../evolutions/evolution_page.dart';
 
-class PetDetails extends StatelessWidget {
+class PetActions extends StatelessWidget {
   final Pet pet;
 
-  const PetDetails({required this.pet, super.key});
+  const PetActions({required this.pet, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,12 @@ class PetDetails extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _buildCardButton(context, 'Perfil', Icons.pets, () {}),
+                  _buildCardButton(context, 'Perfil', Icons.pets, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PetProfilePage(pet: pet)),
+                    );
+                  }),
                   _buildCardButton(context, 'Vacinas', Icons.calendar_today, () {
                     Navigator.push(
                       context,

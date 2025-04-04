@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../database/models/evolution.dart';
-import '../database/models/pet.dart';
-import '../database/helpers/database_helper.dart';
-import '../database/repositories/evolution_repository.dart';
+import '../../database/models/evolution.dart';
+import '../../database/models/pet.dart';
+import '../../database/helpers/database_helper.dart';
+import '../../database/repositories/evolution_repository.dart';
 
 class EvolutionForm extends StatefulWidget {
   final Pet pet;

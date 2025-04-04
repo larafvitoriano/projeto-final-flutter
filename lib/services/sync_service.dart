@@ -33,7 +33,11 @@ class SyncService {
       'name': pet.name,
       'species': pet.species,
       'breed': pet.breed,
+      'sex': pet.sex,
       'age': pet.age,
+      'weight': pet.weight,
+      'allergy': pet.allergy,
+      'observations': pet.observations,
     }, SetOptions(merge: true));
   }
 
@@ -52,7 +56,11 @@ class SyncService {
         'name': pet.name,
         'species': pet.species,
         'breed': pet.breed,
+        'sex': pet.sex,
         'age': pet.age,
+        'weight': pet.weight,
+        'allergy': pet.allergy,
+        'observations': pet.observations,
       });
     }
   }
@@ -366,7 +374,11 @@ class SyncService {
         name: data['name'],
         species: data['species'],
         breed: data['breed'],
+        sex: data['sex'],
         age: data['age'],
+        weight: data['weight'],
+        allergy: data['allergy'],
+        observations: data['observations'],
       );
       await petRepository.insertPet(pet);
 

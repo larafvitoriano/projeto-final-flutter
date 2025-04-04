@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../database/models/evolution.dart';
-import '../database/helpers/database_helper.dart';
-import '../database/repositories/evolution_repository.dart';
-import '../database/models/pet.dart';
+import '../../database/models/evolution.dart';
+import '../../database/helpers/database_helper.dart';
+import '../../database/repositories/evolution_repository.dart';
+import '../../database/models/pet.dart';
 import 'evolution_form.dart';
 
 class EvolutionPage extends StatefulWidget {
