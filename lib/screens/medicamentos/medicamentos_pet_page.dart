@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../database/helpers/database_helper.dart';
 import '../../database/models/medicine.dart';
 import '../../database/models/pet.dart';
@@ -28,36 +27,23 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Medicamentos de ${widget.pet.name}'),
-        backgroundColor: Colors.orange[300],
+        title: Text('Medicamentos de ${widget.pet.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blue[300],
+        elevation: 2,
       ),
       body: FutureBuilder<List<Medicine>>(
-        future: Future.delayed(Duration.zero, () async {
-          try {
-            return await _medicineRepository.getMedicinesByPetId(widget.pet.id!);
-          } catch (e) {
-            print('Erro ao recuperar medicamentos: $e');
-            throw e;
-          }
-        }),
+        future: _medicineRepository.getMedicinesByPetId(widget.pet.id!),
         builder: (context, snapshot) {
-          print('Recuperando medicamentos para petId: ${widget.pet.id}');
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return const Center(child: Text('Erro ao carregar os medicamentos'));
-          } else if (snapshot.hasData) {
-            print('Medicamentos recuperados: ${snapshot.data}');
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final medicines = snapshot.data!;
             return ListView.builder(
               itemCount: medicines.length,
               itemBuilder: (context, index) {
-                try {
-                  return _buildMedicineCard(medicines[index]);
-                } catch (e) {
-                  print('Erro ao construir card: $e');
-                  return const Text('Erro ao exibir medicamento');
-                }
+                return _buildMedicineCard(medicines[index]);
               },
             );
           } else {
@@ -74,7 +60,8 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
             setState(() {});
           });
         },
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -94,10 +81,10 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
       onLongPress: () {
         _showDeleteConfirmationDialog(context, medicine);
       },
-
       child: Card(
         margin: const EdgeInsets.all(8.0),
-        elevation: 3,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -105,15 +92,39 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
             children: <Widget>[
               Text(
                 medicine.name,
-                style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.blue),
               ),
               const SizedBox(height: 8.0),
-              Text('Dosagem: ${medicine.dosage} ${medicine.unit}'),
-              Text('Frequência: ${medicine.frequency}'),
-              Text('Via de Administração: ${medicine.administration}'),
-              Text('Data de Início: ${medicine.startDate}'),
-              if (medicine.endDate != null) Text('Data de Término: ${medicine.endDate}'),
-              if (medicine.notes != null) Text('Notas: ${medicine.notes}'),
+              Row(
+                children: [
+                  const Icon(Icons.medical_services, color: Colors.grey, size: 18),
+                  const SizedBox(width: 5),
+                  Text('Dosagem: ${medicine.dosage} ${medicine.unit}'),
+                ],
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, color: Colors.grey, size: 18),
+                  const SizedBox(width: 5),
+                  Text('Início: ${medicine.startDate}'),
+                ],
+              ),
+              if (medicine.endDate != null)
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today, color: Colors.grey, size: 18),
+                    const SizedBox(width: 5),
+                    Text('Término: ${medicine.endDate}'),
+                  ],
+                ),
+              if (medicine.notes != null)
+                Row(
+                  children: [
+                    const Icon(Icons.notes, color: Colors.grey, size: 18),
+                    const SizedBox(width: 5),
+                    Text('Notas: ${medicine.notes}'),
+                  ],
+                ),
             ],
           ),
         ),
@@ -127,7 +138,7 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Excluir Medicamento'),
+          title: const Text('Excluir Medicamento', style: TextStyle(fontWeight: FontWeight.bold)),
           content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
@@ -137,16 +148,16 @@ class _MedicamentosPetPageState extends State<MedicamentosPetPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancelar'),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Excluir'),
+              child: const Text('Excluir', style: TextStyle(color: Colors.red)),
               onPressed: () async {
                 await _medicineRepository.deleteMedicine(medicine.id!, medicine.petId);
-                setState(() {}); // Atualiza a lista após a exclusão
+                setState(() {});
                 Navigator.of(context).pop();
               },
             ),

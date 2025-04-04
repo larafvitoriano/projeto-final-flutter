@@ -32,7 +32,6 @@ class _ExamFormState extends State<ExamForm> {
     if (widget.exam != null) {
       _nomeController.text = widget.exam!.name;
       _dataController.text = widget.exam!.date;
-      // Para editar o PDF, você pode precisar de uma lógica adicional para lidar com o arquivo existente.
       _notesController.text = widget.exam!.notes ?? '';
     }
   }
