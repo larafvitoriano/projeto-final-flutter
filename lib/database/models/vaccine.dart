@@ -6,6 +6,7 @@ class Vaccine {
   String name;
   String date;
   String nextDoseDate;
+  String? notes;
 
   Vaccine({
     this.id,
@@ -13,6 +14,7 @@ class Vaccine {
     required this.name,
     required this.date,
     required this.nextDoseDate,
+    this.notes,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,6 +24,7 @@ class Vaccine {
       VaccineContract.nameColumn: name,
       VaccineContract.dateColumn: date,
       VaccineContract.nextDoseDateColumn: nextDoseDate,
+      VaccineContract.notesColumn: notes,
     };
   }
 
@@ -32,6 +35,7 @@ class Vaccine {
       name: map[VaccineContract.nameColumn],
       date: map[VaccineContract.dateColumn],
       nextDoseDate: map[VaccineContract.nextDoseDateColumn],
+      notes: map[VaccineContract.notesColumn],
     );
   }
 }

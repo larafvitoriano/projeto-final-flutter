@@ -20,6 +20,7 @@ class _VacinasFormState extends State<VacinasForm> {
   final _nameController = TextEditingController();
   final _dateController = TextEditingController();
   final _nextDoseDateController = TextEditingController();
+  final _notesController = TextEditingController();
 
   late VaccineRepository _vaccineRepository;
 
@@ -31,6 +32,7 @@ class _VacinasFormState extends State<VacinasForm> {
       _nameController.text = widget.vaccine!.name;
       _dateController.text = widget.vaccine!.date;
       _nextDoseDateController.text = widget.vaccine!.nextDoseDate;
+      _notesController.text = widget.vaccine!.notes ?? '';
     }
   }
 
@@ -39,6 +41,7 @@ class _VacinasFormState extends State<VacinasForm> {
     _nameController.dispose();
     _dateController.dispose();
     _nextDoseDateController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -99,6 +102,15 @@ class _VacinasFormState extends State<VacinasForm> {
                 labelText: 'Próxima Dose',
                 icon: Icons.next_plan,
               ),
+              const SizedBox(height: 12.0),
+              _buildTextFormField(
+                controller: _notesController,
+                labelText: 'Observações',
+                icon: Icons.notes,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                validator: null,
+              ),
               const SizedBox(height: 24.0),
               ElevatedButton(
                 onPressed: () async {
@@ -109,6 +121,7 @@ class _VacinasFormState extends State<VacinasForm> {
                       name: _nameController.text,
                       date: _dateController.text,
                       nextDoseDate: _nextDoseDateController.text,
+                      notes: _notesController.text.isNotEmpty ? _notesController.text : null,
                     );
                     try{
                       if (widget.vaccine == null) {
@@ -122,7 +135,7 @@ class _VacinasFormState extends State<VacinasForm> {
                       Navigator.pop(context);
                     } catch (e){
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Erro ao cadastrar/atualizar vacina')),
+                        const SnackBar(content: Text('Erro ao cadastrar ou atualizar a vacina')),
                       );
                     }
                   }
@@ -148,6 +161,7 @@ class _VacinasFormState extends State<VacinasForm> {
     required IconData icon,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
+    int? maxLines,
   }) {
     return TextFormField(
       controller: controller,
@@ -163,6 +177,7 @@ class _VacinasFormState extends State<VacinasForm> {
         }
         return null;
       },
+      maxLines: maxLines,
     );
   }
 

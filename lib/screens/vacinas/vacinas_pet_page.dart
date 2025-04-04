@@ -125,6 +125,17 @@ class _VacinasPetPageState extends State<VacinasPetPage> {
                         Text('Próxima Dose: ${vaccine.nextDoseDate}'),
                       ],
                     ),
+                    Row(
+                      children: <Widget>[
+                        const Icon(Icons.notes, size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            'Observações: ${vaccine.notes?.isNotEmpty == true ? vaccine.notes : 'Não informado'}',
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
