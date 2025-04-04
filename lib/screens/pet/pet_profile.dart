@@ -16,11 +16,13 @@ class PetProfilePage extends StatefulWidget {
 class _PetProfilePageState extends State<PetProfilePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late Pet _pet;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _pet = widget.pet;
   }
 
   @override
@@ -33,7 +35,7 @@ class _PetProfilePageState extends State<PetProfilePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.pet.name} - Perfil'),
+        title: Text('${_pet.name} - Perfil'),
         backgroundColor: Colors.blue[300],
         bottom: TabBar(
           controller: _tabController,
@@ -49,18 +51,23 @@ class _PetProfilePageState extends State<PetProfilePage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildInfoTab(widget.pet),
-          _buildDetailsTab(widget.pet),
+          _buildInfoTab(_pet),
+          _buildDetailsTab(_pet),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final updatedPet = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PetForm(pet: widget.pet, isEditing: true),
+              builder: (context) => PetForm(pet: _pet, isEditing: true),
             ),
           );
+          if (updatedPet != null) {
+            setState(() {
+              _pet = updatedPet;
+            });
+          }
         },
         child: const Icon(Icons.edit),
         backgroundColor: Colors.blue[300],
@@ -77,23 +84,22 @@ class _PetProfilePageState extends State<PetProfilePage>
           Center(
             child: CircleAvatar(
               radius: 80,
-              backgroundImage: pet.pictureFile.isNotEmpty
-                  ? FileImage(File(pet.pictureFile))
+              backgroundImage: _pet.pictureFile.isNotEmpty
+                  ? FileImage(File(_pet.pictureFile))
                   : null,
-              backgroundColor: pet.pictureFile.isNotEmpty
+              backgroundColor: _pet.pictureFile.isNotEmpty
                   ? null
                   : Colors.grey[200],
-              child: pet.pictureFile.isNotEmpty
+              child: _pet.pictureFile.isNotEmpty
                   ? null
                   : const Icon(Icons.pets, size: 60, color: Colors.grey),
             ),
           ),
           const SizedBox(height: 24),
-          Center(child: _buildInfoCard('Nome', pet.name)),
-          Center(child: _buildInfoCard('Espécie', pet.species)),
-          Center(child: _buildInfoCard('Raça', pet.breed)),
-          Center(child: _buildInfoCard('Sexo', pet.sex)),
-          Center(child: _buildInfoCard('Idade', _calculateAge(pet.birthDate))),
+          Center(child: _buildInfoCard('Nome', _pet.name)),
+          Center(child: _buildInfoCard('Espécie', _pet.species)),
+          Center(child: _buildInfoCard('Raça', _pet.breed)),
+          Center(child: _buildInfoCard('Sexo', _pet.sex)),
         ],
       ),
     );
@@ -105,12 +111,13 @@ class _PetProfilePageState extends State<PetProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (pet.weight != null) Center(child: _buildInfoCard('Peso', '${pet.weight} kg')), // Formatando o peso
-          if (pet.allergy != null && pet.allergy!.isNotEmpty)
-            Center(child: _buildInfoCard('Alergia', pet.allergy!)),
-          if (pet.notes != null && pet.notes!.isNotEmpty)
-            Center(child: _buildInfoCard('Observações', pet.notes!)),
-          Center(child: _buildInfoCard('Data de Nascimento', pet.birthDate)), // Movendo a data de nascimento para cá
+          Center(child: _buildInfoCard('Idade', _calculateAge(_pet.birthDate))),
+          if (_pet.weight != null) Center(child: _buildInfoCard('Peso', _formatWeight(_pet.weight!))),
+          if (_pet.allergy != null && _pet.allergy!.isNotEmpty)
+            Center(child: _buildInfoCard('Alergia', _pet.allergy!)),
+          if (_pet.notes != null && _pet.notes!.isNotEmpty)
+            Center(child: _buildInfoCard('Observações', _pet.notes!)),
+          Center(child: _buildInfoCard('Data de Nascimento', _pet.birthDate)),
         ],
       ),
     );
@@ -125,19 +132,19 @@ class _PetProfilePageState extends State<PetProfilePage>
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Centraliza verticalmente
-            crossAxisAlignment: CrossAxisAlignment.center, // Centraliza horizontalmente
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Text(
                 label,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                textAlign: TextAlign.center, // Centraliza o texto do título
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 value,
                 style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.center, // Centraliza o texto do valor
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -165,6 +172,14 @@ class _PetProfilePageState extends State<PetProfilePage>
       return '$years ano(s)';
     } else {
       return '$months mes(es)';
+    }
+  }
+
+  String _formatWeight(double weight) {
+    if (weight >= 1.0) {
+      return '${weight.toStringAsFixed(2)} kg';
+    } else {
+      return '${(weight * 1000).toStringAsFixed(0)} g';
     }
   }
 }

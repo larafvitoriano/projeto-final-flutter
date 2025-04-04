@@ -104,14 +104,22 @@ class _PetFormState extends State<PetForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Editar Pet' : 'Cadastrar Pet'),
+        title: Text(widget.isEditing ? 'Editar Pet' : 'Cadastrar Pet', style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.blue[300],
+        elevation: 2,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: _buildStep(_currentStep),
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: _buildStep(_currentStep),
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: Padding(
@@ -120,89 +128,88 @@ class _PetFormState extends State<PetForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             if (_currentStep > 0)
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _currentStep--;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[400],
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text('Anterior', style: TextStyle(fontSize: 16)),
-              ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_currentStep < 1) {
-                  setState(() {
-                    _currentStep++;
-                  });
-                } else {
-                  if (_formKey.currentState!.validate()) {
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
                     setState(() {
-                      _isLoading = true;
+                      _currentStep--;
                     });
-
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      },
-                    );
-                    final pet = Pet(
-                      id: widget.isEditing ? widget.pet?.id : null,
-                      pictureFile: _image?.path ?? '',
-                      name: _nameController.text,
-                      species: _speciesController.text,
-                      breed: _breedController.text,
-                      sex: _sex,
-                      birthDate: _birthDateController.text,
-                      weight: _weightController.text.isNotEmpty ? double.tryParse(_weightController.text) : null,
-                      allergy: _allergyController.text,
-                      notes: _notesController.text,
-                    );
-
-                    try {
-                      if (widget.pet == null) {
-                        await _petRepository.insertPet(pet);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Pet cadastrado com sucesso!')),
-                        );
-                      } else {
-                        await _petRepository.updatePet(pet);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Pet atualizado com sucesso!')),
-                        );
-                      }
-                      Navigator.pop(context, pet);
-                    } finally {
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[400],
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0), // Aumenta o padding vertical
+                  ),
+                  child: const Text('Anterior'),
+                ),
+              ),
+            const SizedBox(width: 16.0), // Espaço entre os botões
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_currentStep < 1) {
+                    setState(() {
+                      _currentStep++;
+                    });
+                  } else {
+                    if (_formKey.currentState!.validate()) {
                       setState(() {
-                        _isLoading = false;
+                        _isLoading = true;
                       });
-                      Navigator.of(context).pop();
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      );
+                      final pet = Pet(
+                        id: widget.isEditing ? widget.pet?.id : null,
+                        pictureFile: _image?.path ?? '',
+                        name: _nameController.text,
+                        species: _speciesController.text,
+                        breed: _breedController.text,
+                        sex: _sex,
+                        birthDate: _birthDateController.text,
+                        weight: _weightController.text.isNotEmpty ? double.tryParse(_weightController.text) : null,
+                        allergy: _allergyController.text,
+                        notes: _notesController.text,
+                      );
+
+                      try {
+                        if (widget.pet == null) {
+                          await _petRepository.insertPet(pet);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Pet cadastrado com sucesso!')),
+                          );
+                        } else {
+                          await _petRepository.updatePet(pet);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Pet atualizado com sucesso!')),
+                          );
+                        }
+                        Navigator.pop(context, pet);
+                      } finally {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        Navigator.of(context).pop();
+                      }
                     }
                   }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[300],
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[300],
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0), // Aumenta o padding vertical
                 ),
-              )
-                  : Text(_currentStep < 1 ? 'Próximo' : (widget.isEditing ? 'Atualizar' : 'Cadastrar'), style: const TextStyle(fontSize: 16)),
+                child: _isLoading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))) : Text(_currentStep < 1 ? 'Próximo' : (widget.isEditing ? 'Atualizar' : 'Cadastrar')),
+              ),
             ),
           ],
         ),
@@ -227,25 +234,13 @@ class _PetFormState extends State<PetForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           _buildImageStep(),
-          const SizedBox(height: 16.0),
-          _buildTextFormField(
-            controller: _nameController,
-            labelText: 'Nome',
-            icon: Icons.pets,
-          ),
-          const SizedBox(height: 16.0),
-          _buildTextFormField(
-            controller: _speciesController,
-            labelText: 'Espécie',
-            icon: Icons.category,
-          ),
-          const SizedBox(height: 16.0),
-          _buildTextFormField(
-            controller: _breedController,
-            labelText: 'Raça',
-            icon: Icons.pets,
-          ),
-          const SizedBox(height: 16.0),
+          const SizedBox(height: 12.0),
+          _buildTextFormField(controller: _nameController, labelText: 'Nome', icon: Icons.pets),
+          const SizedBox(height: 12.0),
+          _buildTextFormField(controller: _speciesController, labelText: 'Espécie', icon: Icons.category),
+          const SizedBox(height: 12.0),
+          _buildTextFormField(controller: _breedController, labelText: 'Raça', icon: Icons.pets),
+          const SizedBox(height: 12.0),
           _buildSexRadioButtons(),
         ],
       ),
@@ -257,55 +252,31 @@ class _PetFormState extends State<PetForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildDateFormField(
-            controller: _birthDateController,
-            labelText: 'Data de Nascimento',
-            icon: Icons.calendar_today,
-          ),
-          const SizedBox(height: 16.0),
-          _buildTextFormField(
-            controller: _weightController,
-            labelText: 'Peso (kg)',
-            icon: Icons.balance,
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16.0),
-          _buildTextFormField(
-            controller: _allergyController,
-            labelText: 'Alergia',
-            icon: Icons.warning,
-          ),
-          const SizedBox(height: 16.0),
-          _buildTextFormField(
-            controller: _notesController,
-            labelText: 'Observações',
-            icon: Icons.description,
-            maxLines: 3,
-          ),
+          _buildDateFormField(controller: _birthDateController, labelText: 'Data de Nascimento', icon: Icons.calendar_today),
+          const SizedBox(height: 12.0),
+          _buildTextFormField(controller: _weightController, labelText: 'Peso', icon: Icons.balance, keyboardType: TextInputType.number),
+          const SizedBox(height: 12.0),
+          _buildTextFormField(controller: _allergyController, labelText: 'Alergia', icon: Icons.warning),
+          const SizedBox(height: 12.0),
+          _buildTextFormField(controller: _notesController, labelText: 'Observações', icon: Icons.description, maxLines: 3),
         ],
       ),
     );
   }
 
-  Widget _buildTextFormField({
-    required TextEditingController controller,
-    required String labelText,
-    required IconData icon,
-    TextInputType? keyboardType,
-    int? maxLines,
-  }) {
+  Widget _buildTextFormField({required TextEditingController controller, required String labelText, required IconData icon, TextInputType? keyboardType, int? maxLines}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: Icon(icon, color: Colors.blue[300]),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue[300]!), borderRadius: BorderRadius.circular(8.0)),
       ),
       keyboardType: keyboardType,
       maxLines: maxLines ?? 1,
       validator: (value) {
-        if (value == null || value.isEmpty && labelText != 'Alergia' && labelText != 'Observações' && labelText != 'Peso (kg)') {
+        if (value == null || value.isEmpty && labelText != 'Alergia' && labelText != 'Observações' && labelText != 'Peso') {
           return 'Por favor, insira $labelText do pet';
         }
         return null;
@@ -325,14 +296,9 @@ class _PetFormState extends State<PetForm> {
               width: double.infinity,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey[400]!),
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(8.0),
               ),
-              child: _image != null
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: Image.file(_image!, fit: BoxFit.cover),
-              )
-                  : const Center(child: Text('Toque para adicionar uma imagem', style: TextStyle(color: Colors.grey))),
+              child: _image != null ? Image.file(_image!, fit: BoxFit.cover) : const Center(child: Text('Toque para adicionar uma imagem')),
             ),
           ),
         ],
@@ -343,43 +309,23 @@ class _PetFormState extends State<PetForm> {
   Widget _buildSexRadioButtons() {
     return Row(
       children: <Widget>[
-        const Text('Sexo:', style: TextStyle(fontSize: 16)),
-        Radio<String>(
-          value: 'Macho',
-          groupValue: _sex,
-          onChanged: (String? value) {
-            setState(() {
-              _sex = value!;
-            });
-          },
-        ),
-        const Text('Macho', style: TextStyle(fontSize: 16)),
-        Radio<String>(
-          value: 'Fêmea',
-          groupValue: _sex,
-          onChanged: (String? value) {
-            setState(() {
-              _sex = value!;
-            });
-          },
-        ),
-        const Text('Fêmea', style: TextStyle(fontSize: 16)),
+        const Text('Sexo: ', style: TextStyle(fontWeight: FontWeight.bold)),
+        Radio<String>(value: 'Macho', groupValue: _sex, onChanged: (String? value) { setState(() { _sex = value!; }); }, activeColor: Colors.blue[300]),
+        const Text('Macho'),
+        Radio<String>(value: 'Fêmea', groupValue: _sex, onChanged: (String? value) { setState(() { _sex = value!; }); }, activeColor: Colors.blue[300]),
+        const Text('Fêmea'),
       ],
     );
   }
 
-  Widget _buildDateFormField({
-    required TextEditingController controller,
-    required String labelText,
-    required IconData icon,
-  }) {
+  Widget _buildDateFormField({required TextEditingController controller, required String labelText, required IconData icon}) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: Icon(icon, color: Colors.blue[300]),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue[300]!), borderRadius: BorderRadius.circular(8.0)),
       ),
       readOnly: true,
       onTap: () => _selectDate(context, controller),
