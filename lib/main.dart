@@ -51,6 +51,7 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[300],
@@ -131,8 +132,7 @@ class MyHomePage extends StatelessWidget {
             children: <Widget>[
               Icon(Icons.pets, size: 100.0, color: Colors.blue[300]),
               const SizedBox(height: 16.0),
-              const Text('Olá, usuário(a)!', style: TextStyle(fontSize: 18.0)),
-              const Text('Seja bem-vindo. O que deseja fazer?', style: TextStyle(fontSize: 18.0)),
+              const Text('Seja bem-vindo(a). O que deseja fazer?', style: TextStyle(fontSize: 18.0)),
               const SizedBox(height: 20.0),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
