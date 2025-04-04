@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_final_flutter/screens/exames/exams_form.dart';
+import 'package:projeto_final_flutter/screens/exames/exams_pet_page.dart';
 import 'package:projeto_final_flutter/screens/pet/pet_profile.dart';
 import '../../database/models/pet.dart';
 import '../vacinas/vacinas_pet_page.dart';
@@ -45,6 +47,11 @@ class PetActions extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => VacinasPetPage(pet: pet)),
                     );
                   }),
+                  _buildCardButton(context, 'Exames', Icons.calendar_today, () {
+                  Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ExamsPetPage(pet: pet)),
+                  );}),
                 ],
               ),
               const SizedBox(height: 16),
