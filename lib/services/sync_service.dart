@@ -138,6 +138,7 @@ class SyncService {
       'name': vaccine.name,
       'date': vaccine.date,
       'nextDoseDate': vaccine.nextDoseDate,
+      'notes': vaccine.notes,
     }, SetOptions(merge: true));
   }
 
@@ -165,6 +166,7 @@ class SyncService {
         'name': vaccine.name,
         'date': vaccine.date,
         'nextDoseDate': vaccine.nextDoseDate,
+        'notes': vaccine.notes,
       });
     }
   }
@@ -398,6 +400,7 @@ class SyncService {
           name: vData['name'],
           date: vData['date'],
           nextDoseDate: vData['nextDoseDate'],
+          notes: vData['notes'],
         );
         await vaccineRepository.insertVaccine(vaccine);
       }

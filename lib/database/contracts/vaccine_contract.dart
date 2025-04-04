@@ -5,4 +5,5 @@ class VaccineContract {
   static const String nameColumn = 'name';
   static const String dateColumn = 'date';
   static const String nextDoseDateColumn = 'nextDoseDate';
+  static const String notesColumn = 'notes';
 }

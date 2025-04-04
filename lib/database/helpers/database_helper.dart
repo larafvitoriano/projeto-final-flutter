@@ -46,6 +46,7 @@ class DatabaseHelper {
               " ${VaccineContract.nameColumn} TEXT, "
               " ${VaccineContract.dateColumn} TEXT, "
               " ${VaccineContract.nextDoseDateColumn} TEXT, "
+              " ${VaccineContract.notesColumn} TEXT, "
               " FOREIGN KEY (${VaccineContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
         );
         await db.execute(

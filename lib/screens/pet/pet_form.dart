@@ -4,7 +4,7 @@ import '../../database/repositories/pet_repository.dart';
 import '../../database/helpers/database_helper.dart';
 
 class PetForm extends StatefulWidget {
-  final Pet? pet; // Pet opcional para edição
+  final Pet? pet;
   final bool isEditing;
 
   const PetForm({this.pet, this.isEditing = false, super.key});
