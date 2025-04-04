@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../contracts/exam_contract.dart';
 import '../contracts/pet_contract.dart';
 import '../contracts/vaccine_contract.dart';
 import '../contracts/medicine_contract.dart';
@@ -20,6 +21,7 @@ class DatabaseHelper {
     await db.delete(VaccineContract.vaccineTable);
     await db.delete(MedicineContract.medicineTable);
     await db.delete(EvolutionContract.evolutionTable);
+    await db.delete(ExamContract.examsTable);
   }
 
   Future<Database> _initDatabase() async {
@@ -27,7 +29,7 @@ class DatabaseHelper {
     String path = join(databasesPath, "pets.db");
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (Database db, int newerVersion) async {
         await db.execute(
           "CREATE TABLE ${PetContract.petTable}(${PetContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -71,7 +73,29 @@ class DatabaseHelper {
                 " ${EvolutionContract.notesColumn} TEXT, "
                 " FOREIGN KEY (${EvolutionContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))"
         );
+        await db.execute(
+          "CREATE TABLE ${ExamContract.examsTable}(${ExamContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
+              " ${ExamContract.petIdColumn} INTEGER, "
+              " ${ExamContract.nameColumn} TEXT, "
+              " ${ExamContract.dateColumn} TEXT, "
+              " ${ExamContract.pdfFileColumn} BLOB, "
+              " ${ExamContract.notesColumn} TEXT, "
+              " FOREIGN KEY (${ExamContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
+        );
       },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async{
+    if(oldVersion < 4){
+    await db.execute(
+    "CREATE TABLE ${ExamContract.examsTable}(${ExamContract.idColumn} INTEGER PRIMARY KEY AUTOINCREMENT, "
+    " ${ExamContract.petIdColumn} INTEGER, "
+    " ${ExamContract.nameColumn} TEXT, "
+    " ${ExamContract.dateColumn} TEXT, "
+    " ${ExamContract.pdfFileColumn} BLOB, "
+        " ${ExamContract.notesColumn} TEXT, "
+    " FOREIGN KEY (${ExamContract.petIdColumn}) REFERENCES ${PetContract.petTable}(${PetContract.idColumn}))",
+    );
+    }
+    }
     );
   }
 }
