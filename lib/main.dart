@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_final_flutter/screens/calendar_screen.dart';
 import 'screens/pet/meus_pets_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,7 +16,6 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('pt', 'BR'), // Português do Brasil
+        Locale('pt', 'BR'),
       ],
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
@@ -63,9 +63,7 @@ class MyHomePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              // Limpa os dados locais
               await DatabaseHelper().clearDatabase();
-              // Efetua o logout do Firebase
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacement(
                 context,
@@ -104,8 +102,18 @@ class MyHomePage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings, color: Colors.green[500]),
-              title: const Text('Configurações'),
+              leading: Icon(Icons.calendar_month, color: Colors.green[500]),
+              title: const Text('Calendário'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CalendarScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.ring_volume, color: Colors.green[500]),
+              title: const Text('Notificações'),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -144,7 +152,11 @@ class MyHomePage extends StatelessWidget {
                     ),
                     const SizedBox(width: 16.0),
                     Expanded(
-                      child: _buildCardButton(context, 'Configurações', Icons.settings, const Placeholder()), // Usando Placeholder temporariamente
+                      child: _buildCardButton(context, 'Calendário', Icons.calendar_month, CalendarScreen()),
+                    ),
+                    const SizedBox(width: 16.0),
+                    Expanded(
+                      child: _buildCardButton(context, 'Notificações', Icons.ring_volume, CalendarScreen()),
                     ),
                   ],
                 ),
