@@ -334,7 +334,7 @@ class SyncService {
           'localId': localId,
           'petId': evolution.petId,
           'weight': evolution.weight,
-          'date': evolution.date.toIso8601String(),
+          'date': evolution.date,
           'notes': evolution.notes,
         }, SetOptions(merge: true));
   }
@@ -363,7 +363,7 @@ class SyncService {
           .doc(docId)
           .update({
             'weight': evolution.weight,
-            'date': evolution.date.toIso8601String(),
+            'date': evolution.date,
             'notes': evolution.notes,
           });
     }
@@ -569,7 +569,7 @@ class SyncService {
           id: evoData['localId'], // campo salvo no Firestore
           petId: evoData['petId'],
           weight: evoData['weight'],
-          date: DateTime.parse(evoData['date']),
+          date: evoData['date'],
           notes: evoData['notes'],
         );
         await evolutionRepository.insertEvolution(evolution);

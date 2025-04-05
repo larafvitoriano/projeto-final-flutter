@@ -133,27 +133,57 @@ class _EvolutionPageState extends State<EvolutionPage> {
           itemCount: evolutions.length,
           itemBuilder: (context, index) {
             final evo = evolutions[index];
-            return ListTile(
-              title: Text(
-                'Peso: ${evo.weight} kg',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                'Data: ${DateFormat('dd/MM/yyyy').format(evo.date)}'
-                    '${evo.notes != null ? "\nObservações: ${evo.notes}" : ""}',
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () async {
-                  await _evolutionRepository.deleteEvolution(evo.id!, widget.pet.id!);
-                  setState(() {
-                    _futureEvolutions = _evolutionRepository.getEvolutionsByPetId(widget.pet.id!);
-                  });
-                },
+            return Card(
+              elevation: 2,
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Peso: ${evo.weight} kg',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text('Data: ${evo.date}'),
+                    if (evo.notes != null) Text('Observações: ${evo.notes}'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EvolutionForm(pet: widget.pet, evolution: evo),
+                              ),
+                            );
+                            setState(() {
+                              _futureEvolutions = _evolutionRepository.getEvolutionsByPetId(widget.pet.id!);
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            await _evolutionRepository.deleteEvolution(evo.id!, widget.pet.id!);
+                            setState(() {
+                              _futureEvolutions = _evolutionRepository.getEvolutionsByPetId(widget.pet.id!);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Registro excluído com sucesso!')),
+                              );
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },
-          separatorBuilder: (context, index) => const Divider(),
+          separatorBuilder: (context, index) => const SizedBox(),
         ),
       ),
     );

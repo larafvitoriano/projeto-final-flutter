@@ -2,7 +2,7 @@ class Evolution {
   int? id;            // ID local (SQLite)
   int petId;          // ID local do pet
   double weight;      // Peso do pet em kg
-  DateTime date;      // Data do registro
+  String date;      // Data do registro
   String? notes;      // Observações opcionais
 
   Evolution({
@@ -18,7 +18,7 @@ class Evolution {
       'id': id,
       'petId': petId,
       'weight': weight,
-      'date': date.toIso8601String(),
+      'date': date,
       'notes': notes,
     };
   }
@@ -28,7 +28,7 @@ class Evolution {
       id: map['id'],
       petId: map['petId'],
       weight: map['weight'],
-      date: DateTime.parse(map['date']),
+      date: map['date'],
       notes: map['notes'],
     );
   }

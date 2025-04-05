@@ -135,8 +135,14 @@ class _ExamFormState extends State<ExamForm> {
                     );
                     if (widget.exam == null) {
                       await repository!.insertExam(exam);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Exame cadastrado com sucesso!')),
+                      );
                     } else {
                       await repository!.updateExam(exam);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Exame atualizado com sucesso!')),
+                      );
                     }
                     Navigator.pop(context);
                   }
